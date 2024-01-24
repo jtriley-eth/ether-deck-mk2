@@ -9,9 +9,6 @@ contract FlashModule {
     address internal runner;
     uint256 internal nonce;
 
-    /// @dev flash fee slot index; solidity does not allow this in assembly, so this is for show
-    uint256 internal constant FlashFeeSlotIndex = uint256(keccak256("EtherDeckMk2.FlashFeeSlotIndex")) - 1;
-
     /// @dev divisor of flash fee
     uint256 internal constant divisor = 10_000;
 
