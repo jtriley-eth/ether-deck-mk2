@@ -26,12 +26,13 @@ contract Module4337 {
     /// @dev Directives:
     ///      01. if caller is not runner, revert
     ///      02. store entry point in storage
+    /// @dev entry point slot is defined as `keccak256("EtherDeckMk2.EntryPoint") - 1`
     /// @param entryPoint the address of the entry point
     function setEntryPoint(address entryPoint) external {
         assembly {
             if iszero(eq(sload(runner.slot), caller())) { revert(0x00, 0x00) }
 
-            sstore(0xeeadf9c47495dc7413664b6a976e5956125db2f78ef26b808660c128f443d4ab, entryPoint)
+            sstore(0xeeadf9c47495dc7413664b6a976e5956125db2f78ef26b808660c128f443d4aa, entryPoint)
         }
     }
 
