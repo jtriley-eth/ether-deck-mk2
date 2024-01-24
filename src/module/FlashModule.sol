@@ -78,7 +78,7 @@ contract FlashModule {
     ///      01. store `token.transfer.selector` in memory
     ///      02. store transfer receiver in memory
     ///      03. store transfer amount in memory
-    ///      04. make transfer call to token; cache as success
+    ///      04. call `token.transfer`; cache as success
     ///      05. check if returndata is either one or nothing; compose success
     ///      06. store `receiver.onFlashLoan` in memory
     ///      07. store onFlashLoan initiator in memory
@@ -89,13 +89,13 @@ contract FlashModule {
     ///      12. store onFlashLoan fee in memory
     ///      13. store onFlashLoan data offset in memory
     ///      14. copy onFlashLoan data to memory
-    ///      15. make onFlashLoan call to receiver; compose success
+    ///      15. call `receiver.onFlashLoan`; compose success
     ///      16. check if returndata is onFlashLoan return value; compose success
     ///      17. store `token.transferFrom.selector` in memory
     ///      18. store transferFrom sender in memory (sender is flash receiver)
     ///      19. store transferFrom receiver in memory (receiver is the Ether Deck Mk2)
     ///      20. store trasnferFrom amount in memory (amount is sum of flash amount and fee)
-    ///      21. make transferFrom call to token; compose success
+    ///      21. call `token.transferFrom`; compose success
     ///      22. check if returndata is either one or nothing; compose success
     ///      23. store one (true) in memory
     ///      24. if success, return true
