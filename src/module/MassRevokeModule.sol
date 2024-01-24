@@ -51,9 +51,9 @@ contract MassRevokeModule {
 
                 mstore(0x04, calldataload(spenderOffset))
 
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x44, 0x00, 0x20))
+                success := and(success, call(gas(), token, 0x00, 0x00, 0x44, 0x44, 0x20))
 
-                success := and(success, or(iszero(returndatasize()), mload(0x00)))
+                success := and(success, or(iszero(returndatasize()), mload(0x44)))
 
                 tokenOffset := add(tokenOffset, 0x20)
 
@@ -173,9 +173,9 @@ contract MassRevokeModule {
 
                 mstore(0x24, calldataload(operatorOffset))
 
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x64, 0x00, 0x00))
+                success := and(success, call(gas(), token, 0x00, 0x00, 0x64, 0x64, 0x20))
 
-                success := and(success, mload(0x00))
+                success := and(success, mload(0x64))
 
                 tokenOffset := add(tokenOffset, 0x20)
 
@@ -281,9 +281,9 @@ contract MassRevokeModule {
 
                 mstore(0x04, calldataload(operatorOffset))
 
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x44, 0x00, 0x20))
+                success := and(success, call(gas(), token, 0x00, 0x00, 0x44, 0x44, 0x20))
 
-                success := and(success, mload(0x00))
+                success := and(success, mload(0x44))
 
                 tokenOffset := add(tokenOffset, 0x20)
 
