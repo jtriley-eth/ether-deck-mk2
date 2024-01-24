@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-/// @title Ether Deck Mk2 Flash Module
+/// @title Ether Deck Mk2 Flash Mod
 /// @author jtriley.eth
 /// @notice a reasonably optimized erc-3156 compliant flash lender for Ether Deck Mk2
-contract FlashModule {
+contract FlashMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
     uint256 internal nonce;

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-/// @title Ether Deck Mk2 Mass Revoke Module
+/// @title Ether Deck Mk2 Mass Revoke Mod
 /// @author jtriley.eth
-/// @notice a reasonably optimized approval revocation module for Ether Deck Mk2
+/// @notice a reasonably optimized approval revocation mod for Ether Deck Mk2
 /// @dev supports erc-20, erc-721, erc-1155, and erc-6909
-contract MassRevokeModule {
+contract MassRevokeMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
     uint256 internal nonce;

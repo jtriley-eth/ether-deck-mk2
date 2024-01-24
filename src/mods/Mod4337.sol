@@ -14,10 +14,10 @@ struct Op4337 {
     bytes signature;
 }
 
-/// @title Ether Deck Mk2 ERC-4337 User Operation Validation Module
+/// @title Ether Deck Mk2 ERC-4337 User Operation Validation Mod
 /// @author jtriley.eth
 /// @notice implements erc-4337 account interface
-contract Module4337 {
+contract Mod4337 {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
     uint256 internal nonce;

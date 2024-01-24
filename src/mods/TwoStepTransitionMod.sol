@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-/// @title Ether Deck Mk2 Two Step Transfer Module
+/// @title Ether Deck Mk2 Two Step Transfer Mod
 /// @author jtriley.eth
-/// @notice a reasonably optimized two step runner transfer module for Ether Deck Mk2
-contract TwoStepTransitionModule {
+/// @notice a reasonably optimized two step runner transfer mod for Ether Deck Mk2
+contract TwoStepTransitionMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
     uint256 internal nonce;

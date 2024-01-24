@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-/// @title Ether Deck Mk2 Mass Transfer Module
+/// @title Ether Deck Mk2 Mass Transfer Modu
 /// @author jtriley.eth
-/// @notice a reasonably optimized transfer module for Ether Deck Mk2
+/// @notice a reasonably optimized transfer mod for Ether Deck Mk2
 /// @dev supports erc-20, erc-721, erc-1155, and erc-6909
-contract MassTransferModule {
+contract MassTransferMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
     uint256 internal nonce;

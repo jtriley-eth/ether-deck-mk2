@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-/// @title Ether Deck Mk2 Storage Module
+/// @title Ether Deck Mk2 Storage Mod
 /// @author jtriley.eth
 /// @notice a reasonably optimized batch storage writer for Ether Deck Mk2
-contract StorageModule {
+contract StorageMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
     uint256 internal nonce;
