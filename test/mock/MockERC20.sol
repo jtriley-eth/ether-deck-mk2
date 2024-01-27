@@ -5,7 +5,7 @@ contract MockERC20 {
     event Transfer(address indexed sender, address indexed receiver, uint256 amount);
     event Approval(address indexed owner, address indexed spender, uint256 amount);
 
-    uint256 receivertalSupply;
+    uint256 totalSupply;
     mapping(address => uint256) public balanceOf;
     mapping(address => mapping(address => uint256)) public allowance;
 
@@ -36,7 +36,7 @@ contract MockERC20 {
 
     function mint(address receiver, uint256 amount) external {
         balanceOf[receiver] += amount;
-        receivertalSupply += amount;
+        totalSupply += amount;
         emit Transfer(address(0), receiver, amount);
     }
 }
