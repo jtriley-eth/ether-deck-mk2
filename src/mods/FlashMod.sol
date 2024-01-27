@@ -20,7 +20,7 @@ contract FlashMod {
     ///      04. store the flash fee factor in storage at the slot hash
     /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashFeeSlotIndex") - 1`
     /// @param token the token to flash
-    /// @param factor the flash fee factor in 1/10_000
+    /// @param factor the flash fee factor in `1 / 10_000`
     function setFlashFeeFactor(address token, uint256 factor) external {
         assembly {
             if iszero(eq(sload(runner.slot), caller())) { revert(0x00, 0x00) }
