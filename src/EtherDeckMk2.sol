@@ -21,6 +21,12 @@ contract EtherDeckMk2 {
     /// @notice nonce of runner
     uint256 public nonce;
 
+    constructor() {
+        assembly {
+            sstore(runner.slot, caller())
+        }
+    }
+
     /// @notice runs a call
     /// @dev Directives:
     ///      01. check if caller is runner; cache as success
@@ -47,12 +53,13 @@ contract EtherDeckMk2 {
         }
     }
 
+    // TODO: update directives
     /// @notice runs a batch of calls
     /// @dev Directives:
     ///      01. check if caller is runner; cache as success
-    ///      02. load target offset; cache as targetOffset
-    ///      03. load value offset; cache as valueOffset
-    ///      04. load payload offset; cache as payloadOffset
+    ///      02. load target offset; cache as targetPtr
+    ///      03. load value offset; cache as valuePtr
+    ///      04. load payload offset; cache as payloadPtr
     ///      05. check that targets and values length match; compose success
     ///      06. check that targets and payloads length match; compose success
     ///      07. loop:
@@ -77,32 +84,35 @@ contract EtherDeckMk2 {
         assembly {
             let success := eq(sload(runner.slot), caller())
 
-            let targetOffset := targets.offset
+            let targetPtr := targets.offset
 
-            let valueOffset := values.offset
+            let valuePtr := values.offset
 
-            let payloadOffset := add(0x20, payloads.offset)
+            let payloadPtr := payloads.offset
+
+            let targetsEnd := add(targets.offset, mul(targets.length, 0x20))
 
             success := and(success, eq(targets.length, values.length))
 
             success := and(success, eq(targets.length, payloads.length))
 
             for { } 1 { } {
-                let target := calldataload(targetOffset)
+                if eq(targetPtr, targetsEnd) { break }
 
-                if iszero(target) { break }
+                let payload := add(payloads.offset, calldataload(payloadPtr))
 
-                let payloadLength := mload(payloadOffset)
+                let payloadLen := calldataload(payload)
 
-                calldatacopy(0x00, add(0x20, payloadOffset), payloadLength)
+                calldatacopy(0x00, add(0x20, payload), payloadLen)
 
-                success := and(success, call(gas(), target, calldataload(valueOffset), 0x00, payloadLength, 0x00, 0x00))
+                success :=
+                    and(success, call(gas(), calldataload(targetPtr), calldataload(valuePtr), 0x00, payloadLen, 0x00, 0x00))
 
-                targetOffset := add(targetOffset, 0x20)
+                targetPtr := add(targetPtr, 0x20)
 
-                valueOffset := add(valueOffset, 0x20)
+                valuePtr := add(valuePtr, 0x20)
 
-                payloadOffset := add(payloadOffset, add(0x20, payloadLength))
+                payloadPtr := add(payloadPtr, 0x20)
             }
 
             if success { return(0x00, 0x00) }
@@ -111,34 +121,32 @@ contract EtherDeckMk2 {
         }
     }
 
+    // TODO: update directives
     /// @notice runs a call on behalf of the runner
     /// @dev directives:
-    ///      01. subtract bribe from callvalue; cache as value
     ///      01. copy sigdata to memory
     ///      02. ecrecover; cache as success
     ///      03. check if recovered address is runner; compose success
     ///      04. copy payload to memory
     ///      00. compute payload end; cache as payloadEnd
     ///      05. store target after payload in memory
-    ///      00. store value after target in memory
-    ///      00. store bribe after value in memory
+    ///      00. store callvalue after target in memory
+    ///      00. store bribe after callvalue in memory
     ///      06. load nonce from storage; cache as sigNonce
-    ///      07. store nonce after payload, target, value, and bribe in memory
+    ///      07. store nonce after payload, target, callvalue, and bribe in memory
     ///      08. check if hash matches sigdata hash; compose success
     ///      09. store incremented nonce in storage
     ///      00. make external call to caller with bribe; compose success
-    ///      10. make external call to target with value and payload; compose success
+    ///      10. make external call to target with callvalue and payload; compose success
     ///      11. copy returndata to memory
     ///      12. if success, return with returndata
     ///      13. else, revert with revertdata
-    /// @dev sighash is `keccak256(abi.encode(payload, target, value, bribe, nonce))`
+    /// @dev sighash is `keccak256(abi.encode(payload, target, callvalue, bribe, nonce))`
     /// @param target the call target address
     /// @param payload the call payload
     /// @param sigdata the ecrecover signature data
     function runFrom(address target, bytes calldata payload, bytes calldata sigdata, uint256 bribe) external payable {
         assembly {
-            let value := sub(callvalue(), bribe)
-
             calldatacopy(0x00, sigdata.offset, sigdata.length)
 
             let success := staticcall(gas(), 0x01, 0x00, sigdata.length, 0x00, 0x20)
@@ -147,17 +155,15 @@ contract EtherDeckMk2 {
 
             calldatacopy(0x00, payload.offset, payload.length)
 
-            let payloadEnd := add(payload.offset, payload.length)
+            mstore(payload.length, target)
 
-            mstore(payloadEnd, target)
+            mstore(add(0x20, payload.length), callvalue())
 
-            mstore(add(0x20, payloadEnd), value)
-
-            mstore(add(0x40, payloadEnd), bribe)
+            mstore(add(0x40, payload.length), bribe)
 
             let sigNonce := sload(nonce.slot)
 
-            mstore(add(0x60, payloadEnd), sigNonce)
+            mstore(add(0x60, payload.length), sigNonce)
 
             success := and(success, eq(keccak256(0x00, add(0x80, payload.length)), calldataload(sigdata.offset)))
 
