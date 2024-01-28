@@ -17,12 +17,14 @@ contract DifferentialEtherDeckMk2Test is Test {
     }
 
     function testFuzzDiffRun(
+        bool runnerIsActor,
         address runner,
         address actor,
         address target,
         uint256 value,
         bytes calldata payload
     ) public {
+        runner = runnerIsActor ? actor : runner;
         runner = boundAddy(runner);
         actor = boundAddy(actor);
         target = boundAddy(target);
@@ -49,12 +51,14 @@ contract DifferentialEtherDeckMk2Test is Test {
     }
 
     function testFuzzDiffRunBatch(
+        bool runnerIsActor,
         address runner,
         address actor,
         address[] memory targets,
         uint256[] memory values,
         bytes[] memory payloads
     ) public {
+        runner = runnerIsActor ? actor : runner;
         runner = boundAddy(runner);
         actor = boundAddy(actor);
 
@@ -90,6 +94,7 @@ contract DifferentialEtherDeckMk2Test is Test {
     }
 
     function testFuzzDiffRunFrom(
+        bool runnerIsActor,
         uint256 runnerPk,
         address actor,
         address target,
@@ -100,6 +105,8 @@ contract DifferentialEtherDeckMk2Test is Test {
         bytes calldata invalidSigdata
     ) public {
         runnerPk = boundPk(runnerPk);
+        actor = runnerIsActor ? vm.addr(runnerPk) : actor;
+
         actor = boundAddy(actor);
         target = boundAddy(target);
         value = bound(value, 0, type(uint256).max / 4);
@@ -137,10 +144,13 @@ contract DifferentialEtherDeckMk2Test is Test {
     }
 
     function testFuzzDiffSetDispatch(
+        bool runnerIsActor,
         address runner,
+        address actor,
         bytes4 selector,
         address target
     ) public {
+        runner = runnerIsActor ? actor : runner;
         setRunner(runner);
 
         vm.startPrank(runner);
@@ -152,7 +162,14 @@ contract DifferentialEtherDeckMk2Test is Test {
         assertEq(slowDeck.dispatch(selector), target);
     }
 
-    function testFuzzDiffDispatch(address runner, bytes4 selector, address target) public {
+    function testFuzzDiffDispatch(
+        bool runnerIsActor,
+        address runner,
+        address actor,
+        bytes4 selector,
+        address target
+    ) public {
+        runner = runnerIsActor ? actor : runner;
         target = boundAddy(target);
         setRunner(runner);
 
