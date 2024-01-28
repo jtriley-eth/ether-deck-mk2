@@ -21,7 +21,7 @@ contract MassTransferMod {
     ///      07. store `erc20.transfer` selector in memory
     ///      08. loop:
     ///          a. load token from calldata
-    ///          b. if token is zero, break
+    ///          b. if token is zero, break loop
     ///          c. move receiver from calldata to memory
     ///          d. move amount from calldata to memory
     ///          e. call `erc20.transfer`; compose success
@@ -92,7 +92,7 @@ contract MassTransferMod {
     ///      08. store self address in memory
     ///      09. loop:
     ///          a. load token from calldata
-    ///          b. if token is zero, break
+    ///          b. if token is zero, break loop
     ///          c. move receiver from calldata to memory
     ///          d. move id from calldata to memory
     ///          e. call `erc721.transferFrom`; compose success
@@ -165,7 +165,7 @@ contract MassTransferMod {
     ///      11. store empty bytes data in memory
     ///      12. loop:
     ///          a. load token from calldata
-    ///          b. if token is zero, break
+    ///          b. if token is zero, break loop
     ///          c. move receiver from calldata to memory
     ///          d. move id from calldata to memory
     ///          e. move amount from calldata to memory
@@ -250,7 +250,7 @@ contract MassTransferMod {
     ///      09. store `erc6909.transfer` selector in memory
     ///      10. loop:
     ///          a. load token from calldata
-    ///          b. if token is zero, break
+    ///          b. if token is zero, break loop
     ///          c. move receiver from calldata to memory
     ///          d. move id from calldata to memory
     ///          e. move amount from calldata to memory
