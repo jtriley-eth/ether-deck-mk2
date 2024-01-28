@@ -49,9 +49,17 @@ contract FlashModTest is Test {
     function testMaxFlashLoan() public asActor(alice) {
         assertEq(flashMod.maxFlashLoan(address(token)), 0);
 
+        flashMod.setFlashFeeFactor(address(token), 1);
+
         token.mint(address(flashMod), defaultAmount);
 
         assertEq(flashMod.maxFlashLoan(address(token)), defaultAmount);
+    }
+
+    function testMaxFlashLoanNotSupported() public {
+        token.mint(address(flashMod), defaultAmount);
+
+        assertEq(0, flashMod.maxFlashLoan(address(token)));
     }
 
     function testFlashFee() public asActor(alice) {
@@ -120,12 +128,14 @@ contract FlashModTest is Test {
         }
     }
 
-    function testFuzzMaxFlashLoan(address actor, uint256 amount) public asActor(actor) {
+    function testFuzzMaxFlashLoan(bool supported, address actor, uint256 amount) public asActor(actor) {
         assertEq(flashMod.maxFlashLoan(address(token)), 0);
+
+        if (supported) flashMod.setFlashFeeFactor(address(token), 1);
 
         token.mint(address(flashMod), amount);
 
-        assertEq(flashMod.maxFlashLoan(address(token)), amount);
+        assertEq(flashMod.maxFlashLoan(address(token)), supported ? amount : 0);
     }
 
     function testFuzzFlashFee(address actor, uint256 amount, uint256 factor) public asActor(actor) {

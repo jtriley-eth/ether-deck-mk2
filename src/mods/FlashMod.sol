@@ -35,18 +35,30 @@ contract FlashMod {
 
     /// @notice gets max flash loan
     /// @dev Directives:
-    ///      01. store `token.balanceOf.selector` in memory
-    ///      02. store Ether Deck Mk2 address in memory
-    ///      03. if call to `token.balanceOf` succeeds, return balance
+    ///      01. store token in memory
+    ///      02. store flash fee slot index in memory
+    ///      03. compute flash fee factor slot, load from storage, check if nonzero; cache as success
+    ///      04. store `token.balanceOf.selector` in memory
+    ///      05. store Ether Deck Mk2 address in memory
+    ///      06. staticcall to `token.balanceOf`; cache as success
+    ///      07. if success, return balance
     ///      04. else, return zero
     /// @param token the token to flash
     function maxFlashLoan(address token) external view returns (uint256) {
         assembly {
+            mstore(0x00, token)
+
+            mstore(0x20, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
+
+            let success := iszero(iszero(sload(keccak256(0x00, 0x40))))
+
             mstore(0x00, 0x70a0823100000000000000000000000000000000000000000000000000000000)
 
             mstore(0x04, address())
 
-            if staticcall(gas(), token, 0x00, 0x24, 0x00, 0x20) { return(0x00, 0x20) }
+            success := and(success, staticcall(gas(), token, 0x00, 0x24, 0x00, 0x20))
+
+            if success { return(0x00, 0x20) }
 
             return(0x80, 0x20)
         }
