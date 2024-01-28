@@ -31,10 +31,10 @@ contract EtherDeckMk2 {
     /// @dev Directives:
     ///      01. check if caller is runner; cache as success
     ///      02. copy payload to memory
-    ///      02. make external call to target with callvalue and payload; compose success
-    ///      03. copy returndata to memory
-    ///      04. if success, return with returndata
-    ///      05. else, revert with revertdata
+    ///      03. make external call to target with callvalue and payload; compose success
+    ///      04. copy returndata to memory
+    ///      05. if success, return with returndata
+    ///      06. else, revert with revertdata
     /// @param target the call target
     /// @param payload the call payload
     function run(address target, bytes calldata payload) external payable {
@@ -53,19 +53,19 @@ contract EtherDeckMk2 {
         }
     }
 
-    // TODO: update directives
     /// @notice runs a batch of calls
     /// @dev Directives:
     ///      01. check if caller is runner; cache as success
     ///      02. load target offset; cache as targetPtr
     ///      03. load value offset; cache as valuePtr
     ///      04. load payload offset; cache as payloadPtr
-    ///      05. check that targets and values length match; compose success
-    ///      06. check that targets and payloads length match; compose success
-    ///      07. loop:
-    ///          a. load target from calldata
-    ///          b. if target is zero, break loop
-    ///          c. load payload length from calldata; cache as paylaodLength
+    ///      05. compute end of targets; cache as targetsEnd
+    ///      06. check that targets and values length match; compose success
+    ///      07. check that targets and payloads length match; compose success
+    ///      08. loop:
+    ///          a. if targetPtr is targetsEnd, break loop
+    ///          b. compute payload offset; cache as payload
+    ///          c. load payload length from calldata; cache as payloadLen
     ///          d. copy payload to memory
     ///          e. make external call to target with value and payload; cache as success
     ///          f. increment target offset
@@ -121,26 +121,24 @@ contract EtherDeckMk2 {
         }
     }
 
-    // TODO: update directives
     /// @notice runs a call on behalf of the runner
     /// @dev directives:
     ///      01. copy sigdata to memory
     ///      02. ecrecover; cache as success
     ///      03. check if recovered address is runner; compose success
     ///      04. copy payload to memory
-    ///      00. compute payload end; cache as payloadEnd
     ///      05. store target after payload in memory
-    ///      00. store callvalue after target in memory
-    ///      00. store bribe after callvalue in memory
-    ///      06. load nonce from storage; cache as sigNonce
-    ///      07. store nonce after payload, target, callvalue, and bribe in memory
-    ///      08. check if hash matches sigdata hash; compose success
-    ///      09. store incremented nonce in storage
-    ///      00. make external call to caller with bribe; compose success
-    ///      10. make external call to target with callvalue and payload; compose success
-    ///      11. copy returndata to memory
-    ///      12. if success, return with returndata
-    ///      13. else, revert with revertdata
+    ///      06. store callvalue after target in memory
+    ///      07. store bribe after callvalue in memory
+    ///      08. load nonce from storage; cache as sigNonce
+    ///      09. store nonce after payload, target, callvalue, and bribe in memory
+    ///      10. check if hash matches sigdata hash; compose success
+    ///      11. store incremented nonce in storage
+    ///      12. make external call to caller with bribe; compose success
+    ///      13. make external call to target with callvalue and payload; compose success
+    ///      14. copy returndata to memory
+    ///      15. if success, return with returndata
+    ///      16. else, revert with revertdata
     /// @dev sighash is `keccak256(abi.encode(payload, target, callvalue, bribe, nonce))`
     /// @param target the call target address
     /// @param payload the call payload
