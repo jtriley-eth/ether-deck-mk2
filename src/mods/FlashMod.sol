@@ -29,7 +29,7 @@ contract FlashMod {
 
             mstore(0x20, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
 
-            sstore(keccak256(0x00, 0x20), factor)
+            sstore(keccak256(0x00, 0x40), factor)
         }
     }
 
@@ -133,15 +133,17 @@ contract FlashMod {
 
             mstore(0x64, fee)
 
-            mstore(0x84, 0x20)
+            mstore(0x84, 0xa0)
 
-            calldatacopy(0x84, data.offset, data.length)
+            mstore(0xa4, data.length)
 
-            success := and(success, call(gas(), receiver, 0x00, 0x00, add(0xa4, data.length), 0x00, 0x20))
+            calldatacopy(0xc4, data.offset, data.length)
+
+            success := and(success, call(gas(), receiver, 0x00, 0x00, add(0xc4, data.length), 0x00, 0x20))
 
             success := and(success, eq(mload(0x00), 0x439148f0bbc682ca079e46d6e2c2f0c1e3b820f1a291b069d8882abf8cf18dd9))
 
-            mstore(0x00, 0xd61a653800000000000000000000000000000000000000000000000000000000)
+            mstore(0x00, 0x23b872dd00000000000000000000000000000000000000000000000000000000)
 
             mstore(0x04, receiver)
 
