@@ -56,8 +56,11 @@ contract FlashMod {
     /// @dev Directives:
     ///      01. store token in memory
     ///      02. store flash fee slot index in memory
-    ///      03. load the flash fee factor from storage, compute and store the flash fee in memory
-    ///      04. return flash fee
+    ///      03. load the flash fee factor from storage; cache as factor
+    ///      04. begin fee computation; cache as fee
+    ///      05. if fee is zero or fee multiplication step overflows, revert
+    ///      06. finish fee computation, store in memory
+    ///      07. return flash fee
     /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashFeeSlotIndex") - 1`
     /// @param token the token to flash
     /// @param amount the amount for which to compute the flash fee
@@ -67,9 +70,19 @@ contract FlashMod {
 
             mstore(0x20, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
 
-            mstore(0x00, div(mul(amount, sload(keccak256(0x00, 0x40))), divisor))
+            let factor := sload(keccak256(0x00, 0x40))
 
-            return(0x00, 0x20)
+            let fee := mul(amount, factor)
+
+            let success := iszero(iszero(factor))
+
+            success := and(success, or(eq(div(fee, amount), factor), iszero(amount)))
+
+            mstore(0x00, div(fee, divisor))
+
+            if success { return(0x00, 0x20) }
+
+            revert(0x00, 0x00)
         }
     }
 
@@ -84,22 +97,27 @@ contract FlashMod {
     ///      07. store onFlashLoan initiator in memory
     ///      08. store onFlashLoan token in memory
     ///      09. transiently store flash fee slot index in memory
-    ///      10. load flash fee factor from storage and compute flash fee; cache as fee
-    ///      11. store onFlashLoan amount in memory, overwriting flash fee slot index
-    ///      12. store onFlashLoan fee in memory
-    ///      13. store onFlashLoan data offset in memory
-    ///      14. copy onFlashLoan data to memory
-    ///      15. call `receiver.onFlashLoan`; compose success
-    ///      16. check if returndata is onFlashLoan return value; compose success
-    ///      17. store `token.transferFrom.selector` in memory
-    ///      18. store transferFrom sender in memory (sender is flash receiver)
-    ///      19. store transferFrom receiver in memory (receiver is the Ether Deck Mk2)
-    ///      20. store trasnferFrom amount in memory (amount is sum of flash amount and fee)
-    ///      21. call `token.transferFrom`; compose success
-    ///      22. check if returndata is either one or nothing; compose success
-    ///      23. store one (true) in memory
-    ///      24. if success, return true
-    ///      25. else, revert
+    ///      10. compute flash fee factor slot and load from storage; cache as factor
+    ///      11. check if factor is nonzero; compose success
+    ///      12. begin fee computation; cache as fee
+    ///      13. check if fee multiplication step overflows; compose success
+    ///      14. finish fee computation; cache as fee
+    ///      15. store onFlashLoan amount in memory, overwriting flash fee slot index
+    ///      16. store onFlashLoan fee in memory
+    ///      17. store onFlashLoan data offset in memory
+    ///      18. store onFlashLoan data length in memory
+    ///      19. copy onFlashLoan data to memory
+    ///      20. call `receiver.onFlashLoan`; compose success
+    ///      21. check if returndata is onFlashLoan return value; compose success
+    ///      22. store `token.transferFrom.selector` in memory
+    ///      23. store transferFrom sender in memory (sender is flash receiver)
+    ///      24. store transferFrom receiver in memory (receiver is the Ether Deck Mk2)
+    ///      25. store trasnferFrom amount in memory (amount is sum of flash amount and fee)
+    ///      26. call `token.transferFrom`; compose success
+    ///      27. check if returndata is either one or nothing; compose success
+    ///      28. store one (true) in memory
+    ///      29. if success, return true
+    ///      30. else, revert
     /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashFeeSlotIndex") - 1`
     /// @dev onFlashLoan return value is defined as `keccak256("ERC3156FlashBorrower.onFlashLoan")`
     /// @param receiver the receiver of the flash
@@ -127,7 +145,15 @@ contract FlashMod {
 
             mstore(0x44, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
 
-            let fee := div(mul(amount, sload(keccak256(0x24, 0x40))), divisor)
+            let factor := sload(keccak256(0x24, 0x40))
+
+            success := and(success, iszero(iszero(factor)))
+
+            let fee := mul(amount, factor)
+
+            success := and(success, or(eq(div(fee, amount), factor), iszero(amount)))
+
+            fee := div(fee, divisor)
 
             mstore(0x44, amount)
 
