@@ -32,7 +32,7 @@ contract MassRevokeMod {
     /// @param spenders the spenders to revoke approval for
     function revokeERC20Approval(address[] calldata tokens, address[] calldata spenders) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, spenders.length))
 
@@ -87,7 +87,7 @@ contract MassRevokeMod {
     /// @param ids the ids to revoke approval for
     function revokeERC721Approval(address[] calldata tokens, uint256[] calldata ids) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, ids.length))
 
@@ -148,7 +148,7 @@ contract MassRevokeMod {
         address[] calldata operators
     ) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, ids.length))
 
@@ -211,7 +211,7 @@ contract MassRevokeMod {
     /// @param operators the operators to revoke approval for
     function revokeApprovalForAll(address[] calldata tokens, address[] calldata operators) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, operators.length))
 
@@ -262,7 +262,7 @@ contract MassRevokeMod {
     ///      08. else, revert
     function revokeOperator(address[] calldata tokens, address[] calldata operators) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, operators.length))
 

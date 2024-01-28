@@ -16,7 +16,7 @@ contract TwoStepTransitionMod {
     /// @dev newRunner slot is defined as `keccak256("EtherDeckMk2.NewRunner") - 1`
     function startRunnerTransition(address newRunner) external {
         assembly {
-            if iszero(eq(sload(runner.slot), caller())) { revert(0x00, 0x00) }
+            if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
             sstore(0x91575d7bad3e5965f801b4ac5f4d48ffddfc86e1a6f2ba31dc5a35148e00e041, newRunner)
         }

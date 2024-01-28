@@ -23,7 +23,7 @@ contract FlashMod {
     /// @param factor the flash fee factor in `1 / 10_000`
     function setFlashFeeFactor(address token, uint256 factor) external {
         assembly {
-            if iszero(eq(sload(runner.slot), caller())) { revert(0x00, 0x00) }
+            if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
             mstore(0x00, token)
 

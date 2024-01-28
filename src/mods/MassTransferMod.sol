@@ -40,7 +40,7 @@ contract MassTransferMod {
         uint256[] calldata amounts
     ) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, receivers.length))
 
@@ -110,7 +110,7 @@ contract MassTransferMod {
         uint256[] calldata ids
     ) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, receivers.length))
 
@@ -187,7 +187,7 @@ contract MassTransferMod {
         uint256[] calldata amounts
     ) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, receivers.length))
 
@@ -269,7 +269,7 @@ contract MassTransferMod {
         uint256[] calldata amounts
     ) external {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             success := and(success, eq(tokens.length, receivers.length))
 

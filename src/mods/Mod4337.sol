@@ -30,7 +30,7 @@ contract Mod4337 {
     /// @param entryPoint the address of the entry point
     function setEntryPoint(address entryPoint) external {
         assembly {
-            if iszero(eq(sload(runner.slot), caller())) { revert(0x00, 0x00) }
+            if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
             sstore(0xeeadf9c47495dc7413664b6a976e5956125db2f78ef26b808660c128f443d4aa, entryPoint)
         }

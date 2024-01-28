@@ -39,7 +39,7 @@ contract EtherDeckMk2 {
     /// @param payload the call payload
     function run(address target, bytes calldata payload) external payable {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             calldatacopy(0x00, payload.offset, payload.length)
 
@@ -82,7 +82,7 @@ contract EtherDeckMk2 {
         bytes[] calldata payloads
     ) external payable {
         assembly {
-            let success := eq(sload(runner.slot), caller())
+            let success := eq(caller(), sload(runner.slot))
 
             let targetPtr := targets.offset
 
@@ -190,7 +190,7 @@ contract EtherDeckMk2 {
     /// @param target the target address to dispatch to
     function setDispatch(bytes4 selector, address target) external {
         assembly {
-            if iszero(eq(sload(runner.slot), caller())) { revert(0x00, 0x00) }
+            if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
             mstore(0x00, selector)
 

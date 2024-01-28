@@ -24,7 +24,7 @@ contract StorageMod {
     /// @param values the values to write
     function write(bytes32[] calldata slots, bytes32[] calldata values) external {
         assembly {
-            if iszero(and(eq(sload(runner.slot), caller()), eq(slots.length, values.length))) { revert(0x00, 0x00) }
+            if iszero(and(eq(caller(), sload(runner.slot)), eq(slots.length, values.length))) { revert(0x00, 0x00) }
 
             let slotOffset := slots.offset
 
