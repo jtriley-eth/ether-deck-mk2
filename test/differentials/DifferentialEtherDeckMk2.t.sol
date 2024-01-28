@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-import { Test, console } from "../lib/forge-std/src/Test.sol";
+import { Test, console } from "../../lib/forge-std/src/Test.sol";
 
-import { EtherDeckMk2 } from "../src/EtherDeckMk2.sol";
-import { DifferentialEtherDeckMk2 } from "./differentials/DifferentialEtherDeckMk2.sol";
-import { MockTarget } from "./mock/MockTarget.sol";
+import { EtherDeckMk2 } from "../../src/EtherDeckMk2.sol";
+import { DifferentialEtherDeckMk2 } from "./implementations/DifferentialEtherDeckMk2.sol";
+import { MockTarget } from "../mock/MockTarget.sol";
 
 contract DifferentialEtherDeckMk2Test is Test {
     EtherDeckMk2 internal fastDeck;
