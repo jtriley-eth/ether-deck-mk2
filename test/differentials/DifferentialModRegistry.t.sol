@@ -33,7 +33,7 @@ contract DifferentialModRegistryTest is Test {
 
         vm.startPrank(actor);
 
-        if (actorIsAuthority) {
+        if (actor == authority) {
             vm.expectEmit(true, true, true, true);
             emit ModRegistry.AuthorityTransferred(secondaryAuthority);
             fastRegistry.transferAuthority(secondaryAuthority);
@@ -82,7 +82,7 @@ contract DifferentialModRegistryTest is Test {
 
         vm.startPrank(actor);
 
-        if (actorIsAuthority && bytes(modName).length < 32) {
+        if (actor == authority && bytes(modName).length < 32) {
             vm.expectEmit(true, true, true, true);
             emit ModRegistry.ModRegistered(modAddress, modName);
             fastRegistry.register(modAddress, modName);

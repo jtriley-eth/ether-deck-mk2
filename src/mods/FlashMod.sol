@@ -14,7 +14,7 @@ contract FlashMod {
 
     /// @notice sets flash fee factor
     /// @dev Directives:
-    ///      01. if caller is not runner, revert
+    ///      01. if caller is not runner or factor is greater than divisor, revert
     ///      02. store token in memory
     ///      03. store flash fee slot index in memory
     ///      04. store the flash fee factor in storage at the slot hash
@@ -23,7 +23,7 @@ contract FlashMod {
     /// @param factor the flash fee factor in `1 / 10_000`
     function setFlashFeeFactor(address token, uint256 factor) external {
         assembly {
-            if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
+            if or(iszero(eq(caller(), sload(runner.slot))), gt(factor, divisor)) { revert(0x00, 0x00) }
 
             mstore(0x00, token)
 
@@ -114,22 +114,23 @@ contract FlashMod {
     ///      12. begin fee computation; cache as fee
     ///      13. check if fee multiplication step overflows; compose success
     ///      14. finish fee computation; cache as fee
-    ///      15. store onFlashLoan amount in memory, overwriting flash fee slot index
-    ///      16. store onFlashLoan fee in memory
-    ///      17. store onFlashLoan data offset in memory
-    ///      18. store onFlashLoan data length in memory
-    ///      19. copy onFlashLoan data to memory
-    ///      20. call `receiver.onFlashLoan`; compose success
-    ///      21. check if returndata is onFlashLoan return value; compose success
-    ///      22. store `token.transferFrom.selector` in memory
-    ///      23. store transferFrom sender in memory (sender is flash receiver)
-    ///      24. store transferFrom receiver in memory (receiver is the Ether Deck Mk2)
-    ///      25. store trasnferFrom amount in memory (amount is sum of flash amount and fee)
-    ///      26. call `token.transferFrom`; compose success
-    ///      27. check if returndata is either one or nothing; compose success
-    ///      28. store one (true) in memory
-    ///      29. if success, return true
-    ///      30. else, revert
+    ///      15. check if fee and amount overflow; compose success
+    ///      16. store onFlashLoan amount in memory, overwriting flash fee slot index
+    ///      17. store onFlashLoan fee in memory
+    ///      18. store onFlashLoan data offset in memory
+    ///      19. store onFlashLoan data length in memory
+    ///      20. copy onFlashLoan data to memory
+    ///      21. call `receiver.onFlashLoan`; compose success
+    ///      22. check if returndata is onFlashLoan return value; compose success
+    ///      23. store `token.transferFrom.selector` in memory
+    ///      24. store transferFrom sender in memory (sender is flash receiver)
+    ///      25. store transferFrom receiver in memory (receiver is the Ether Deck Mk2)
+    ///      26. store trasnferFrom amount in memory (amount is sum of flash amount and fee)
+    ///      27. call `token.transferFrom`; compose success
+    ///      28. check if returndata is either one or nothing; compose success
+    ///      29. store one (true) in memory
+    ///      30. if success, return true
+    ///      31. else, revert
     /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashFeeSlotIndex") - 1`
     /// @dev onFlashLoan return value is defined as `keccak256("ERC3156FlashBorrower.onFlashLoan")`
     /// @param receiver the receiver of the flash
@@ -166,6 +167,8 @@ contract FlashMod {
             success := and(success, or(eq(div(fee, amount), factor), iszero(amount)))
 
             fee := div(fee, divisor)
+
+            success := and(success, iszero(lt(add(amount, fee), amount)))
 
             mstore(0x44, amount)
 

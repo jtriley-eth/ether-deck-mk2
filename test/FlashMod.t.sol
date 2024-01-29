@@ -38,6 +38,13 @@ contract FlashModTest is Test {
         assertEq(bytes32(defaultFactor), vm.load(address(flashMod), flashFeeFactorSlot(token)));
     }
 
+    function testSetFlashFeeFactorTooHigh() public asActor(alice) {
+        assertEq(bytes32(0), vm.load(address(flashMod), flashFeeFactorSlot(token)));
+
+        vm.expectRevert();
+        flashMod.setFlashFeeFactor(address(token), divisor + 1);
+    }
+
     function testSetFlashFeeFactorNotRunner() public {
         vm.store(address(flashMod), bytes32(uint256(1)), bytes32(uint256(uint160(alice))));
         vm.expectRevert();
@@ -112,7 +119,7 @@ contract FlashModTest is Test {
     function testFuzzSetFlashFeeFactor(address actor, uint256 factor, bool isRunner) public {
         vm.assume(actor != address(0));
 
-        if (isRunner) {
+        if (isRunner && factor <= divisor) {
             vm.store(address(flashMod), bytes32(uint256(1)), bytes32(uint256(uint160(actor))));
         } else {
             vm.expectRevert();
@@ -123,7 +130,7 @@ contract FlashModTest is Test {
         vm.prank(actor);
         flashMod.setFlashFeeFactor(address(token), factor);
 
-        if (isRunner) {
+        if (isRunner && factor <= divisor) {
             assertEq(bytes32(factor), vm.load(address(flashMod), flashFeeFactorSlot(token)));
         }
     }
@@ -139,6 +146,8 @@ contract FlashModTest is Test {
     }
 
     function testFuzzFlashFee(address actor, uint256 amount, uint256 factor) public asActor(actor) {
+        factor = bound(factor, 0, divisor);
+
         bool throws = factor == 0 || amount > type(uint256).max / factor;
 
         assertEq(bytes32(0), vm.load(address(flashMod), flashFeeFactorSlot(token)));
@@ -163,10 +172,14 @@ contract FlashModTest is Test {
         uint256 loanAmount,
         uint256 factor
     ) public asActor(actor) {
+        factor = bound(factor, 0, divisor);
         receiverBalance = bound(receiverBalance, 0, type(uint256).max - modBalance);
-        bool throws = factor == 0 || loanAmount > type(uint256).max / factor;
         uint256 flashFee;
-        unchecked { flashFee = loanAmount * factor / divisor; }
+        unchecked {
+            flashFee = loanAmount * factor / divisor;
+        }
+        bool throws = factor == 0 || loanAmount > type(uint256).max / factor || loanAmount > modBalance
+            || receiverBalance < flashFee;
 
         assertEq(bytes32(0), vm.load(address(flashMod), flashFeeFactorSlot(token)));
 
@@ -180,16 +193,13 @@ contract FlashModTest is Test {
         assertEq(token.balanceOf(address(flashReceiver)), receiverBalance);
         assertEq(token.balanceOf(address(flashMod)), modBalance);
 
-        if (throws || receiverBalance < flashFee || loanAmount > modBalance) {
+        if (throws) {
             vm.expectRevert();
         }
 
         flashMod.flashLoan(address(flashReceiver), address(token), loanAmount, hex"aabbccdd");
 
-        if (throws || receiverBalance < flashFee || loanAmount > modBalance) {
-            assertEq(token.balanceOf(address(flashReceiver)), receiverBalance);
-            assertEq(token.balanceOf(address(flashMod)), modBalance);
-        } else {
+        if (!throws) {
             assertEq(token.balanceOf(address(flashReceiver)), receiverBalance - flashFee);
             assertEq(token.balanceOf(address(flashMod)), modBalance + flashFee);
         }
