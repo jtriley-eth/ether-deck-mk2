@@ -11,7 +11,7 @@ contract MassRevokeMod {
     uint256 internal nonce;
 
     /// @notice revokes approvals for erc-20 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and spenders are equal length; compose success
     ///      03. load token offset; cache as tokenOffset
@@ -67,7 +67,7 @@ contract MassRevokeMod {
     }
 
     /// @notice revokes approvals for erc-721 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and ids are equal length; compose success
     ///      03. load token offset; cache as tokenOffset
@@ -118,7 +118,7 @@ contract MassRevokeMod {
     }
 
     /// @notice revokes approvals for erc-6909 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and ids are equal length; compose success
     ///      03. check if tokens and operators are equal length; compose success
@@ -191,7 +191,7 @@ contract MassRevokeMod {
     }
 
     /// @notice revokes operator approvals for erc-721 and erc-1155 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and operators are equal length; compose success
     ///      03. load token offset; cache as tokenOffset
@@ -244,7 +244,7 @@ contract MassRevokeMod {
     }
 
     /// @notice revokes operator approvals for erc-6909 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and operators are equal length; compose success
     ///      03. load token offset; cache as tokenOffset

@@ -10,7 +10,7 @@ contract TwoStepTransitionMod {
     uint256 internal nonce;
 
     /// @notice starts a runner transition
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. if caller is not runner, revert
     ///      02. store newRunner in newRunner slot
     /// @dev newRunner slot is defined as `keccak256("EtherDeckMk2.NewRunner") - 1`
@@ -23,7 +23,7 @@ contract TwoStepTransitionMod {
     }
 
     /// @notice accepts a runner transition
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. load newRunner from newRunner slot
     ///      02. if caller is not newRunner, revert
     ///      03. store newRunner in runner slot

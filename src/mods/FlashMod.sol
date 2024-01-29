@@ -13,7 +13,7 @@ contract FlashMod {
     uint256 internal constant divisor = 10_000;
 
     /// @notice sets flash fee factor
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. if caller is not runner or factor is greater than divisor, revert
     ///      02. store token in memory
     ///      03. store flash fee slot index in memory
@@ -34,7 +34,7 @@ contract FlashMod {
     }
 
     /// @notice gets max flash loan
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. store token in memory
     ///      02. store flash fee slot index in memory
     ///      03. compute flash fee factor slot, load from storage, check if nonzero; cache as success
@@ -65,7 +65,7 @@ contract FlashMod {
     }
 
     /// @notice gets flash fee for a given amount
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. store token in memory
     ///      02. store flash fee slot index in memory
     ///      03. load the flash fee factor from storage; cache as factor
@@ -99,7 +99,7 @@ contract FlashMod {
     }
 
     /// @notice flash loans
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. store `token.transfer.selector` in memory
     ///      02. store transfer receiver in memory
     ///      03. store transfer amount in memory

@@ -25,7 +25,7 @@ contract ModRegistry {
     }
 
     /// @notice transfers authority
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is authority; revert if not
     ///      02. store new authority in storage
     ///      03. log authority transfer
@@ -41,7 +41,7 @@ contract ModRegistry {
     }
 
     /// @notice registers a mod
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is authority and name length is less than 32; revert if not
     ///      02. store address in memory
     ///      03. store searchByAddress index in memory

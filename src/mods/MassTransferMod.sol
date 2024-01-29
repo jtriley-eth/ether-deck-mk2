@@ -11,7 +11,7 @@ contract MassTransferMod {
     uint256 internal nonce;
 
     /// @notice transfers erc-20 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and receivers are equal length; compose success
     ///      03. check if tokens and amounts are equal length; compose success
@@ -81,7 +81,7 @@ contract MassTransferMod {
     }
 
     /// @notice transfers erc-721 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and receivers are equal length; compose success
     ///      03. check if tokens and ids are equal length; compose success
@@ -151,7 +151,7 @@ contract MassTransferMod {
     }
 
     /// @notice transfers erc-1155 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and receivers are equal length; compose success
     ///      03. check if tokens and ids are equal length; compose success
@@ -238,7 +238,7 @@ contract MassTransferMod {
     }
 
     /// @notice transfers erc-6909 tokens
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. check if tokens and receivers are equal length; compose success
     ///      03. check if tokens and ids are equal length; compose success

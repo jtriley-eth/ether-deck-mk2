@@ -28,7 +28,7 @@ contract EtherDeckMk2 {
     }
 
     /// @notice runs a call
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. copy payload to memory
     ///      03. make external call to target with callvalue and payload; compose success
@@ -54,7 +54,7 @@ contract EtherDeckMk2 {
     }
 
     /// @notice runs a batch of calls
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. load target offset; cache as targetPtr
     ///      03. load value offset; cache as valuePtr
@@ -180,7 +180,7 @@ contract EtherDeckMk2 {
     }
 
     /// @notice sets the dispatcher of a selector to a target address
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. revert if caller is not runner
     ///      02. copy selector to memory
     ///      03. store target in storage at `dispatch[selector]`

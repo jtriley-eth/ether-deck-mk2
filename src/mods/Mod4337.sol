@@ -23,7 +23,7 @@ contract Mod4337 {
     uint256 internal nonce;
 
     /// @notice sets the entry point for user operations
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. if caller is not runner, revert
     ///      02. store entry point in storage
     /// @dev entry point slot is defined as `keccak256("EtherDeckMk2.EntryPoint") - 1`
@@ -37,7 +37,7 @@ contract Mod4337 {
     }
 
     /// @notice validates user operation of erc-4337
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. load entry point from storage
     ///      02. if caller is not entry point, revert
     ///      03. store op hash in memory

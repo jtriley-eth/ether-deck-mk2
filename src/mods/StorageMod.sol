@@ -10,7 +10,7 @@ contract StorageMod {
     uint256 internal nonce;
 
     /// @notice writes storage in batch
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. if caller is not runner, revert
     ///      02. load slot offset; cache as slotOffset
     ///      03. load value offset; cache as valueOffset
@@ -45,7 +45,7 @@ contract StorageMod {
     }
 
     /// @notice reads storage in batch
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. load key offset; cache as keyOffset
     ///      02. load array offset; cache as arrayOffset
     ///      03. store slots length in memory
