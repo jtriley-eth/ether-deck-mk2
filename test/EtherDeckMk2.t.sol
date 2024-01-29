@@ -74,21 +74,6 @@ contract EtherDeckMk2Test is Test {
         deck.run(mockTarget, payload);
     }
 
-    function testFuzzRun(
-        address actor,
-        address target,
-        uint256 value,
-        bytes memory payload
-    ) public asPaidActor(actor, value) {
-        target = boundAddy(target);
-
-        vm.etch(target, mockTarget.code);
-
-        vm.expectCall(target, value, payload);
-
-        deck.run{ value: value }(target, payload);
-    }
-
     function testRunBatch() public asPaidActor(alice, defaultValue * 2) {
         address[] memory targets = new address[](2);
         targets[0] = mockTarget;
@@ -107,36 +92,6 @@ contract EtherDeckMk2Test is Test {
         vm.expectCall(targets[1], values[1], payloads[1]);
 
         deck.runBatch{ value: defaultValue * 2 }(targets, values, payloads);
-    }
-
-    function testFuzzRunBatch(
-        address actor,
-        address[16] memory staticTargets,
-        uint256[16] memory staticValues,
-        bytes[16] memory staticPayloads,
-        uint256 length
-    ) public asPaidActor(actor, 0) {
-        uint256 value;
-
-        length = bound(length, 0, 16);
-
-        address[] memory targets = new address[](length);
-        uint256[] memory values = new uint256[](length);
-        bytes[] memory payloads = new bytes[](length);
-
-        for (uint256 i; i < length; i++) {
-            targets[i] = boundAddy(staticTargets[i]);
-            values[i] = bound(staticValues[i], 0, type(uint96).max);
-            payloads[i] = staticPayloads[i];
-
-            value += values[i];
-
-            vm.deal(actor, actor.balance + values[i]);
-            vm.etch(targets[i], mockTarget.code);
-            vm.expectCall(targets[i], values[i], payloads[i]);
-        }
-
-        deck.runBatch{ value: value }(targets, values, payloads);
     }
 
     function testRunFrom() public asPaidActor(alice, defaultValue * 2) {
@@ -244,14 +199,6 @@ contract EtherDeckMk2Test is Test {
         assertEq(deck.dispatch(defaultSelector), mockTarget);
     }
 
-    function testFuzzSetDispatch(bytes4 selector, address target) public {
-        assertEq(deck.dispatch(selector), address(0));
-
-        deck.setDispatch(selector, target);
-
-        assertEq(deck.dispatch(selector), target);
-    }
-
     function testDispatch() public {
         deck.setDispatch(MockMod.runMod.selector, mockMod);
 
@@ -271,6 +218,59 @@ contract EtherDeckMk2Test is Test {
 
         assertEq(expected, defaultSelector);
         assertTrue(succ);
+    }
+
+    function testFuzzRun(
+        address actor,
+        address target,
+        uint256 value,
+        bytes memory payload
+    ) public asPaidActor(actor, value) {
+        target = boundAddy(target);
+
+        vm.etch(target, mockTarget.code);
+
+        vm.expectCall(target, value, payload);
+
+        deck.run{ value: value }(target, payload);
+    }
+
+    function testFuzzRunBatch(
+        address actor,
+        address[16] memory staticTargets,
+        uint256[16] memory staticValues,
+        bytes[16] memory staticPayloads,
+        uint256 length
+    ) public asPaidActor(actor, 0) {
+        uint256 value;
+
+        length = bound(length, 0, 16);
+
+        address[] memory targets = new address[](length);
+        uint256[] memory values = new uint256[](length);
+        bytes[] memory payloads = new bytes[](length);
+
+        for (uint256 i; i < length; i++) {
+            targets[i] = boundAddy(staticTargets[i]);
+            values[i] = bound(staticValues[i], 0, type(uint96).max);
+            payloads[i] = staticPayloads[i];
+
+            value += values[i];
+
+            vm.deal(actor, actor.balance + values[i]);
+            vm.etch(targets[i], mockTarget.code);
+            vm.expectCall(targets[i], values[i], payloads[i]);
+        }
+
+        deck.runBatch{ value: value }(targets, values, payloads);
+    }
+
+    function testFuzzSetDispatch(bytes4 selector, address target) public {
+        assertEq(deck.dispatch(selector), address(0));
+
+        deck.setDispatch(selector, target);
+
+        assertEq(deck.dispatch(selector), target);
     }
 
     function testFuzzDispatch(bool shouldSet, bytes4 selector, address target) public {
