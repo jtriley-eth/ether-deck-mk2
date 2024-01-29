@@ -17,12 +17,12 @@ contract DifferentialModRegistryTest is Test {
     }
 
     function testFuzzDiffTransferAuthority(
-        bool actorIsAuthority,
+        bool authorityIsActorAuthority,
         address actor,
         address authority,
         address secondaryAuthority
     ) public {
-        actor = actorIsAuthority ? authority : actor;
+        actor = authorityIsActorAuthority ? authority : actor;
 
         vm.startPrank(initialAuthority);
 
@@ -59,13 +59,13 @@ contract DifferentialModRegistryTest is Test {
     }
 
     function testFuzzDiffRegister(
-        bool actorIsAuthority,
+        bool authorityIsActorAuthority,
         address actor,
         address authority,
         address modAddress,
         string memory modName
     ) public {
-        actor = actorIsAuthority ? authority : actor;
+        actor = authorityIsActorAuthority ? authority : actor;
 
         vm.startPrank(initialAuthority);
 

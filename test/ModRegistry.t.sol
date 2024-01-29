@@ -73,12 +73,12 @@ contract ModRegistryTest is Test {
     }
 
     function testFuzzTransferAuthority(
-        bool actorIsAuthority,
+        bool authorityIsActorAuthority,
         address authority,
         address secondaryAuthority,
         address actor
     ) public {
-        actor = actorIsAuthority ? authority : actor;
+        actor = authorityIsActorAuthority ? authority : actor;
 
         vm.prank(defaultAuthority);
         registry.transferAuthority(authority);
@@ -101,13 +101,13 @@ contract ModRegistryTest is Test {
     }
 
     function testFuzzRegister(
-        bool actorIsAuthority,
+        bool authorityIsActorAuthority,
         address authority,
         address actor,
         address modAddress,
         string calldata modName
     ) public {
-        actor = actorIsAuthority ? authority : actor;
+        actor = authorityIsActorAuthority ? authority : actor;
 
         vm.prank(defaultAuthority);
         registry.transferAuthority(authority);
