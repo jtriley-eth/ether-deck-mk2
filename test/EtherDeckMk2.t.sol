@@ -67,7 +67,7 @@ contract EtherDeckMk2Test is Test {
     function testRunCallReverts() public asPaidActor(alice, defaultValue) {
         bytes memory payload = hex"aabbccdd";
 
-        vm.etch(mockTarget, hex"5f5ffd");
+        MockTarget(payable(mockTarget)).setThrows(true);
 
         vm.expectRevert();
 
@@ -90,6 +90,88 @@ contract EtherDeckMk2Test is Test {
 
         vm.expectCall(targets[0], values[0], payloads[0]);
         vm.expectCall(targets[1], values[1], payloads[1]);
+
+        deck.runBatch{ value: defaultValue * 2 }(targets, values, payloads);
+    }
+
+    function testRunBatchNoValue() public asPaidActor(alice, 0) {
+        address[] memory targets = new address[](2);
+        targets[0] = mockTarget;
+        targets[1] = address(0xffff);
+        vm.etch(address(0xffff), mockTarget.code);
+
+        uint256[] memory values = new uint256[](2);
+        values[0] = 0;
+        values[1] = 0;
+
+        bytes[] memory payloads = new bytes[](2);
+        payloads[0] = hex"aabbccdd";
+        payloads[1] = hex"eeffaabb";
+
+        vm.expectCall(targets[0], values[0], payloads[0]);
+        vm.expectCall(targets[1], values[1], payloads[1]);
+
+        deck.runBatch(targets, values, payloads);
+    }
+
+    function testRunBatchEmptyCalldata() public asPaidActor(alice, defaultValue * 2) {
+        address[] memory targets = new address[](2);
+        targets[0] = mockTarget;
+        targets[1] = address(0xffff);
+        vm.etch(address(0xffff), mockTarget.code);
+
+        uint256[] memory values = new uint256[](2);
+        values[0] = defaultValue;
+        values[1] = defaultValue;
+
+        bytes[] memory payloads = new bytes[](2);
+        payloads[0] = hex"";
+        payloads[1] = hex"";
+
+        vm.expectCall(targets[0], values[0], payloads[0]);
+        vm.expectCall(targets[1], values[1], payloads[1]);
+
+        deck.runBatch{ value: defaultValue * 2 }(targets, values, payloads);
+    }
+
+    function testRunBatchNotOwner() public {
+        address[] memory targets = new address[](2);
+        targets[0] = mockTarget;
+        targets[1] = address(0xffff);
+        vm.etch(address(0xffff), mockTarget.code);
+
+        uint256[] memory values = new uint256[](2);
+        values[0] = defaultValue;
+        values[1] = defaultValue;
+
+        bytes[] memory payloads = new bytes[](2);
+        payloads[0] = hex"aabbccdd";
+        payloads[1] = hex"eeffaabb";
+
+        vm.expectRevert();
+
+        vm.deal(bob, defaultValue * 2);
+        vm.prank(bob);
+        deck.runBatch{ value: defaultValue * 2 }(targets, values, payloads);
+    }
+
+    function testRunBatchCallReverts() public asPaidActor(alice, defaultValue * 2) {
+        address[] memory targets = new address[](2);
+        targets[0] = mockTarget;
+        targets[1] = address(0xffff);
+        vm.etch(address(0xffff), mockTarget.code);
+
+        uint256[] memory values = new uint256[](2);
+        values[0] = defaultValue;
+        values[1] = defaultValue;
+
+        bytes[] memory payloads = new bytes[](2);
+        payloads[0] = hex"aabbccdd";
+        payloads[1] = hex"eeffaabb";
+
+        MockTarget(payable(targets[1])).setThrows(true);
+
+        vm.expectRevert();
 
         deck.runBatch{ value: defaultValue * 2 }(targets, values, payloads);
     }
@@ -191,7 +273,7 @@ contract EtherDeckMk2Test is Test {
         deck.runFrom{ value: defaultValue }(mockTarget, payload, sigdata, defaultValue);
     }
 
-    function testSetDispatch() public {
+    function testSetDispatch() public asPaidActor(alice, 0) {
         assertEq(deck.dispatch(defaultSelector), address(0));
 
         deck.setDispatch(defaultSelector, mockTarget);
@@ -199,17 +281,25 @@ contract EtherDeckMk2Test is Test {
         assertEq(deck.dispatch(defaultSelector), mockTarget);
     }
 
-    function testDispatch() public {
+    function testDispatch() public asPaidActor(alice, 0) {
         deck.setDispatch(MockMod.runMod.selector, mockMod);
-
-        vm.expectCall(mockMod, 0, abi.encode(MockMod.runMod.selector));
 
         vm.expectEmit(true, true, true, true);
         emit MockMod.RunMod();
 
-        (bool succ,) = address(deck).call(abi.encode(MockMod.runMod.selector));
+        MockMod(payable(deck)).runMod();
+    }
 
-        assertTrue(succ);
+    function testDispatchReverts() public asPaidActor(alice, 0) {
+        deck.setDispatch(MockMod.setThrows.selector, mockMod);
+
+        MockMod(payable(deck)).setThrows(true);
+
+        deck.setDispatch(MockMod.runMod.selector, mockMod);
+
+        vm.expectRevert();
+
+        MockMod(payable(deck)).runMod();
     }
 
     function testEmptyDispatch() public {
@@ -222,25 +312,31 @@ contract EtherDeckMk2Test is Test {
 
     function testFuzzRun(
         address actor,
-        address target,
+        bytes32 salt,
         uint256 value,
-        bytes memory payload
+        bytes memory payload,
+        bool throws
     ) public asPaidActor(actor, value) {
-        target = boundAddy(target);
+        address target = address(new MockTarget{ salt: salt }());
 
-        vm.etch(target, mockTarget.code);
+        MockTarget(payable(target)).setThrows(throws);
 
-        vm.expectCall(target, value, payload);
+        if (throws) {
+            vm.expectRevert();
+        } else {
+            vm.expectCall(target, value, payload);
+        }
 
         deck.run{ value: value }(target, payload);
     }
 
     function testFuzzRunBatch(
         address actor,
-        address[16] memory staticTargets,
+        bytes32 salt,
         uint256[16] memory staticValues,
         bytes[16] memory staticPayloads,
-        uint256 length
+        uint256 length,
+        bool throws
     ) public asPaidActor(actor, 0) {
         uint256 value;
 
@@ -251,53 +347,89 @@ contract EtherDeckMk2Test is Test {
         bytes[] memory payloads = new bytes[](length);
 
         for (uint256 i; i < length; i++) {
-            targets[i] = boundAddy(staticTargets[i]);
+            targets[i] = address(new MockTarget{ salt: salt }());
             values[i] = bound(staticValues[i], 0, type(uint96).max);
             payloads[i] = staticPayloads[i];
 
+            MockTarget(payable(targets[i])).setThrows(throws);
+
             value += values[i];
+            salt = keccak256(abi.encode(salt));
 
             vm.deal(actor, actor.balance + values[i]);
             vm.etch(targets[i], mockTarget.code);
-            vm.expectCall(targets[i], values[i], payloads[i]);
+            if (!throws) vm.expectCall(targets[i], values[i], payloads[i]);
+        }
+
+        if (throws && length != 0) {
+            vm.expectRevert();
         }
 
         deck.runBatch{ value: value }(targets, values, payloads);
     }
 
-    function testFuzzSetDispatch(bytes4 selector, address target) public {
+    function testFuzzSetDispatch(
+        bool runnerIsActor,
+        address actor,
+        address runner,
+        bytes4 selector,
+        address target
+    ) public asPaidActor(runner, 0) {
+        actor = runnerIsActor ? runner : actor;
+
         assertEq(deck.dispatch(selector), address(0));
 
-        deck.setDispatch(selector, target);
+        if (runner == actor) {
+            vm.expectEmit(true, true, true, true);
+            emit EtherDeckMk2.DispatchSet(selector, target);
+        } else {
+            vm.expectRevert();
+        }
 
-        assertEq(deck.dispatch(selector), target);
+        vm.startPrank(actor);
+        deck.setDispatch(selector, target);
+        vm.stopPrank();
+
+        if (runner == actor) {
+            assertEq(deck.dispatch(selector), target);
+        } else {
+            assertEq(deck.dispatch(selector), address(0));
+        }
     }
 
-    function testFuzzDispatch(bool shouldSet, bytes4 selector, address target) public {
-        target = boundAddy(target);
-        vm.etch(target, mockTarget.code);
+    function testFuzzDispatch(
+        bool shouldSet,
+        bytes4 selector,
+        bytes32 salt,
+        bool throws
+    ) public asPaidActor(alice, 0) {
+        vm.assume(selector != MockMod.setThrows.selector && selector != MockMod.runMod.selector);
+
+        address mod = address(new MockMod{ salt: salt }());
+
+        deck.setDispatch(MockMod.setThrows.selector, mod);
+        MockMod(payable(deck)).setThrows(throws);
+        deck.setDispatch(MockMod.setThrows.selector, address(0));
 
         bytes memory payload = abi.encode(selector);
 
-        if (shouldSet) deck.setDispatch(selector, target);
+        if (shouldSet) {
+            deck.setDispatch(selector, mod);
+            if (!throws) {
+                vm.expectEmit(true, true, true, true);
+                emit MockMod.Fallback();
+            }
+        }
 
         (bool succ, bytes memory retdata) = address(deck).call(payload);
 
-        assertTrue(succ);
-
-        if (shouldSet) {
-            assertEq(keccak256(retdata), keccak256(payload));
+        if (shouldSet && !throws) {
+            assertTrue(succ);
+        } else if (shouldSet && throws) {
+            assertFalse(succ);
         } else {
             (bytes4 expected) = abi.decode(retdata, (bytes4));
             assertEq(expected, selector);
         }
-    }
-
-    function boundAddy(address addy) internal view returns (address) {
-        if (
-            uint160(addy) < 256 || addy == address(deck) || addy == 0x7109709ECfa91a80626fF3989D68f67F5b1DD12D
-                || addy == 0x000000000000000000636F6e736F6c652e6c6f67 || addy == 0x4e59b44847b379578588920cA78FbF26c0B4956C
-        ) addy = address(uint160(addy) + 256);
-        return addy;
     }
 }

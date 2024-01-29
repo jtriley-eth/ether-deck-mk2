@@ -67,10 +67,11 @@ contract EtherDeckMk2 {
     ///          b. compute payload offset; cache as payload
     ///          c. load payload length from calldata; cache as payloadLen
     ///          d. copy payload to memory
-    ///          e. make external call to target with value and payload; cache as success
-    ///          f. increment target offset
-    ///          g. increment value offset
-    ///          h. increment payload offset
+    ///          e. load target from calldata; cache as target
+    ///          f. make external call to target with value and payload; cache as success
+    ///          g. increment target offset
+    ///          h. increment value offset
+    ///          i. increment payload offset
     ///      08. if success, return
     ///      09. else, revert
     /// @param targets the call targets
@@ -105,8 +106,9 @@ contract EtherDeckMk2 {
 
                 calldatacopy(0x00, add(0x20, payload), payloadLen)
 
-                success :=
-                    and(success, call(gas(), calldataload(targetPtr), calldataload(valuePtr), 0x00, payloadLen, 0x00, 0x00))
+                let target := calldataload(targetPtr)
+
+                success := and(success, call(gas(), target, calldataload(valuePtr), 0x00, payloadLen, 0x00, 0x00))
 
                 targetPtr := add(targetPtr, 0x20)
 
@@ -196,7 +198,7 @@ contract EtherDeckMk2 {
 
             sstore(keccak256(0x00, 0x40), target)
 
-            log3(0x00, 0x00, 0x66e3803c874b81b53665affdd2cf10254cd6c0c36f33813634442a0844621bf9, selector, target)
+            log3(0x00, 0x00, 0x2c0b629fc2b386c229783b88b245e8730c1397b78e4dd4a43cd7aafdf1b39f12, selector, target)
         }
     }
 

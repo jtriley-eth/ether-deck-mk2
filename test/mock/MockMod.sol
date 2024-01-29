@@ -2,9 +2,25 @@
 pragma solidity 0.8.23;
 
 contract MockMod {
+    mapping(bytes4 => address) internal dispatch;
+    address internal runner;
+    uint256 internal nonce;
+    bool internal throws;
+
     event RunMod();
+    event Fallback();
+
+    function setThrows(bool _throws) external {
+        throws = _throws;
+    }
 
     function runMod() external {
+        require(!throws);
         emit RunMod();
+    }
+
+    fallback() external {
+        require(!throws);
+        emit Fallback();
     }
 }

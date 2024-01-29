@@ -20,14 +20,16 @@ contract DifferentialEtherDeckMk2Test is Test {
         bool runnerIsActor,
         address runner,
         address actor,
-        address target,
+        bytes32 salt,
         uint256 value,
-        bytes calldata payload
+        bytes calldata payload,
+        bool throws
     ) public {
+        address target = address(new MockTarget{ salt: salt }());
+
+        MockTarget(payable(target)).setThrows(throws);
+
         runner = runnerIsActor ? actor : runner;
-        runner = boundAddy(runner);
-        actor = boundAddy(actor);
-        target = boundAddy(target);
         value = bound(value, 0, type(uint256).max / 2);
 
         setRunner(runner);
@@ -35,16 +37,20 @@ contract DifferentialEtherDeckMk2Test is Test {
 
         vm.startPrank(actor);
 
-        try fastDeck.run{ value: value }(target, payload) {
+        if (throws || runner != actor) {
+            vm.expectRevert();
+            fastDeck.run{ value: value }(target, payload);
+
+            vm.expectRevert();
+            slowDeck.run{ value: value }(target, payload);
+        } else {
+            fastDeck.run{ value: value }(target, payload);
             slowDeck.run{ value: value }(target, payload);
 
             assertEq(actor.balance, 0);
             assertEq(address(fastDeck).balance, 0);
             assertEq(address(slowDeck).balance, 0);
             assertEq(target.balance, value * 2);
-        } catch {
-            vm.expectRevert();
-            slowDeck.run{ value: value }(target, payload);
         }
 
         vm.stopPrank();
@@ -54,16 +60,18 @@ contract DifferentialEtherDeckMk2Test is Test {
         bool runnerIsActor,
         address runner,
         address actor,
+        bytes32 salt,
         address[] memory targets,
         uint256[] memory values,
-        bytes[] memory payloads
+        bytes[] memory payloads,
+        bool throws
     ) public {
         runner = runnerIsActor ? actor : runner;
-        runner = boundAddy(runner);
-        actor = boundAddy(actor);
 
         for (uint256 i; i < targets.length; i++) {
-            targets[i] = boundAddy(targets[i]);
+            targets[i] = address(new MockTarget{ salt: salt }());
+            MockTarget(payable(targets[i])).setThrows(throws);
+            salt = keccak256(abi.encode(salt));
         }
 
         uint256 totalValue;
@@ -72,22 +80,27 @@ contract DifferentialEtherDeckMk2Test is Test {
         }
 
         setRunner(runner);
-        vm.deal(actor, totalValue);
+        vm.deal(actor, totalValue * 2);
 
         vm.startPrank(actor);
 
-        try fastDeck.runBatch{ value: totalValue }(targets, values, payloads) {
+        if (throws || targets.length != values.length || targets.length != payloads.length && targets.length != 0) {
+            vm.expectRevert();
+            fastDeck.runBatch(targets, values, payloads);
+
+            vm.expectRevert();
+            slowDeck.runBatch(targets, values, payloads);
+        } else {
+            fastDeck.runBatch{ value: totalValue }(targets, values, payloads);
             slowDeck.runBatch{ value: totalValue }(targets, values, payloads);
 
             assertEq(actor.balance, 0);
             assertEq(address(fastDeck).balance, 0);
             assertEq(address(slowDeck).balance, 0);
+
             for (uint256 i; i < targets.length; i++) {
-                assertEq(targets[i].balance, values[i]);
+                assertEq(targets[i].balance, values[i] * 2);
             }
-        } catch {
-            vm.expectRevert();
-            slowDeck.runBatch{ value: totalValue }(targets, values, payloads);
         }
 
         vm.stopPrank();
@@ -95,47 +108,51 @@ contract DifferentialEtherDeckMk2Test is Test {
 
     function testFuzzDiffRunFrom(
         bool runnerIsActor,
-        uint256 runnerPk,
-        address actor,
-        address target,
+        address runner,
+        uint256 actorPk,
+        address caller,
+        bytes32 salt,
         uint256 value,
         uint256 bribe,
         bytes calldata payload,
         bool validSig,
         bytes calldata invalidSigdata
     ) public {
-        runnerPk = boundPk(runnerPk);
-        actor = runnerIsActor ? vm.addr(runnerPk) : actor;
+        actorPk = boundPk(actorPk);
+        address actor = vm.addr(actorPk);
+        runner = runnerIsActor ? actor : runner;
 
-        actor = boundAddy(actor);
-        target = boundAddy(target);
+        address target = address(new MockTarget{ salt: salt }());
         value = bound(value, 0, type(uint256).max / 4);
         bribe = bound(bribe, 0, type(uint256).max / 4);
 
-        setRunner(vm.addr(runnerPk));
-        vm.deal(actor, value * 2);
+        setRunner(runner);
+        vm.deal(caller, value * 2);
         vm.deal(address(fastDeck), bribe);
         vm.deal(address(slowDeck), bribe);
 
         bytes32 sighash = keccak256(abi.encodePacked(payload, uint256(uint160(target)), value, bribe, fastDeck.nonce()));
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(runnerPk, sighash);
-        bytes memory sigdata = validSig ? abi.encode(sighash, v, r, s) : invalidSigdata;
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(actorPk, sighash);
+        bytes memory sigdata = abi.encode(sighash, v, r, s);
+        if (!validSig) {
+            sigdata = keccak256(invalidSigdata) == keccak256(sigdata) ? abi.encodePacked(invalidSigdata, uint8(0xff)) : invalidSigdata;
+        }
 
-        vm.startPrank(actor);
+        vm.startPrank(caller);
 
-        try fastDeck.runFrom{ value: value }(target, payload, sigdata, bribe) {
+        if (validSig && actor == runner) {
+            fastDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
             slowDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
 
-            if (actor != target) {
-                assertEq(actor.balance, bribe * 2);
-                assertEq(target.balance, value * 2);
-            } else {
-                assertEq(actor.balance, bribe * 2 + value * 2);
-            }
-
+            assertEq(actor.balance, 0);
+            assertEq(caller.balance, bribe * 2);
             assertEq(address(fastDeck).balance, 0);
             assertEq(address(slowDeck).balance, 0);
-        } catch {
+            assertEq(target.balance, value * 2);
+        } else {
+            vm.expectRevert();
+            fastDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
+
             vm.expectRevert();
             slowDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
         }
