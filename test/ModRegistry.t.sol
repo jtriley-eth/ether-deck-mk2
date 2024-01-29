@@ -83,7 +83,7 @@ contract ModRegistryTest is Test {
         vm.prank(defaultAuthority);
         registry.transferAuthority(authority);
 
-        if (actorIsAuthority) {
+        if (actor == authority) {
             vm.expectEmit(true, true, true, true);
             emit ModRegistry.AuthorityTransferred(secondaryAuthority);
         } else {
@@ -93,7 +93,7 @@ contract ModRegistryTest is Test {
         vm.prank(actor);
         registry.transferAuthority(secondaryAuthority);
 
-        if (actorIsAuthority) {
+        if (actor == authority) {
             assertEq(registry.authority(), secondaryAuthority);
         } else {
             assertEq(registry.authority(), authority);
@@ -112,7 +112,7 @@ contract ModRegistryTest is Test {
         vm.prank(defaultAuthority);
         registry.transferAuthority(authority);
 
-        if (actorIsAuthority && bytes(modName).length < 32) {
+        if (actor == authority && bytes(modName).length < 32) {
             vm.expectEmit(true, true, true, true);
             emit ModRegistry.ModRegistered(modAddress, modName);
         } else {
@@ -122,7 +122,7 @@ contract ModRegistryTest is Test {
         vm.prank(actor);
         registry.register(modAddress, modName);
 
-        if (actorIsAuthority && bytes(modName).length < 32) {
+        if (actor == authority && bytes(modName).length < 32) {
             assertEq(registry.searchByName(modName), modAddress);
             assertEq(registry.searchByAddress(modAddress), modName);
         } else {
