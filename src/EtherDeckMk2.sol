@@ -72,8 +72,8 @@ contract EtherDeckMk2 {
     ///          g. increment target offset
     ///          h. increment value offset
     ///          i. increment payload offset
-    ///      08. if success, return
-    ///      09. else, revert
+    ///      09. if success, return
+    ///      10. else, revert
     /// @param targets the call targets
     /// @param values the call values
     /// @param payloads the call payloads
