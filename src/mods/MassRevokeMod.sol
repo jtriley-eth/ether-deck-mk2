@@ -13,12 +13,13 @@ contract MassRevokeMod {
     /// @notice revokes approvals for erc-20 tokens
     /// @dev directives:
     ///      01. check if caller is runner; cache as success
-    ///      02. check if tokens and spenders are equal length; compose success
-    ///      03. load token offset; cache as tokenOffset
-    ///      04. load spender offset; cache as spenderOffset
-    ///      05. store `erc20.approve.selector` in memory
-    ///      06. store approve boolean in memory
-    ///      07. loop:
+    ///      02. load token offset; cache as tokenOffset
+    ///      03. load spender offset; cache as spenderOffset
+    ///      04. compute end of tokens; cache as tokensEnd
+    ///      05. check if tokens and spenders are equal length; compose success
+    ///      06. store `erc20.approve.selector` in memory
+    ///      07. store approve boolean in memory
+    ///      08. loop:
     ///          a. load token from calldata
     ///          b. if token is zero, break loop
     ///          c. move spender from calldata to memory
@@ -26,32 +27,32 @@ contract MassRevokeMod {
     ///          e. check that the return value is either true or nothing; compose success
     ///          f. increment tokenOffset
     ///          g. increment spenderOffset
-    ///      08. if success, return
-    ///      09. else, revert
+    ///      09. if success, return
+    ///      10. else, revert
     /// @param tokens the tokens to revoke approval for
     /// @param spenders the spenders to revoke approval for
     function revokeERC20Approval(address[] calldata tokens, address[] calldata spenders) external {
         assembly {
             let success := eq(caller(), sload(runner.slot))
 
-            success := and(success, eq(tokens.length, spenders.length))
-
             let tokenOffset := tokens.offset
 
             let spenderOffset := spenders.offset
+
+            let tokensEnd := add(tokenOffset, mul(tokens.length, 0x20))
+
+            success := and(success, eq(tokens.length, spenders.length))
 
             mstore(0x00, 0x095ea7b300000000000000000000000000000000000000000000000000000000)
 
             mstore(0x24, 0x00)
 
             for { } 1 { } {
-                let token := calldataload(tokenOffset)
-
-                if iszero(token) { break }
+                if eq(tokenOffset, tokensEnd) { break }
 
                 mstore(0x04, calldataload(spenderOffset))
 
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x44, 0x44, 0x20))
+                success := and(success, call(gas(), calldataload(tokenOffset), 0x00, 0x00, 0x44, 0x44, 0x20))
 
                 success := and(success, or(iszero(returndatasize()), mload(0x44)))
 
@@ -69,19 +70,20 @@ contract MassRevokeMod {
     /// @notice revokes approvals for erc-721 tokens
     /// @dev directives:
     ///      01. check if caller is runner; cache as success
-    ///      02. check if tokens and ids are equal length; compose success
-    ///      03. load token offset; cache as tokenOffset
-    ///      04. load id offset; cache as idOffset
-    ///      05. store `erc721.approve.selector` in memory
-    ///      06. loop:
+    ///      02. load token offset; cache as tokenOffset
+    ///      03. load id offset; cache as idOffset
+    ///      04. compute end of tokens; cache as tokensEnd
+    ///      05. check if tokens and ids are equal length; compose success
+    ///      06. store `erc721.approve.selector` in memory
+    ///      07. loop:
     ///          a. load token from calldata
     ///          b. if token is zero, break loop
     ///          c. move id from calldata to memory
     ///          d. call `erc721.approve`; compose success
     ///          e. increment tokenOffset
     ///          f. increment idOffset
-    ///      07. if success, return
-    ///      08. else, revert
+    ///      08. if success, return
+    ///      09. else, revert
     /// @dev erc721.approve `_approved` argument is implicitly zero at memory[0x04]
     /// @param tokens the tokens to revoke approval for
     /// @param ids the ids to revoke approval for
@@ -89,22 +91,22 @@ contract MassRevokeMod {
         assembly {
             let success := eq(caller(), sload(runner.slot))
 
-            success := and(success, eq(tokens.length, ids.length))
-
             let tokenOffset := tokens.offset
 
             let idOffset := ids.offset
 
+            let tokensEnd := add(tokenOffset, mul(tokens.length, 0x20))
+
+            success := and(success, eq(tokens.length, ids.length))
+
             mstore(0x00, 0x095ea7b300000000000000000000000000000000000000000000000000000000)
 
             for { } 1 { } {
-                let token := calldataload(tokenOffset)
+                if eq(tokenOffset, tokensEnd) { break }
 
-                if iszero(token) { break }
+                mstore(0x24, calldataload(idOffset))
 
-                mstore(0x24, mload(idOffset))
-
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x44, 0x00, 0x00))
+                success := and(success, call(gas(), calldataload(tokenOffset), 0x00, 0x00, 0x44, 0x00, 0x00))
 
                 tokenOffset := add(tokenOffset, 0x20)
 
@@ -117,6 +119,7 @@ contract MassRevokeMod {
         }
     }
 
+    // TODO: directives
     /// @notice revokes approvals for erc-6909 tokens
     /// @dev directives:
     ///      01. check if caller is runner; cache as success
@@ -150,30 +153,30 @@ contract MassRevokeMod {
         assembly {
             let success := eq(caller(), sload(runner.slot))
 
-            success := and(success, eq(tokens.length, ids.length))
-
-            success := and(success, eq(tokens.length, operators.length))
-
             let tokenOffset := tokens.offset
 
             let idOffset := ids.offset
 
             let operatorOffset := operators.offset
 
+            let tokensEnd := add(tokenOffset, mul(tokens.length, 0x20))
+
+            success := and(success, eq(tokens.length, ids.length))
+
+            success := and(success, eq(tokens.length, operators.length))
+
             mstore(0x00, 0x426a849300000000000000000000000000000000000000000000000000000000)
 
             mstore(0x44, 0x00)
 
             for { } 1 { } {
-                let token := calldataload(tokenOffset)
+                if eq(tokenOffset, tokensEnd) { break }
 
-                if iszero(token) { break }
+                mstore(0x04, calldataload(operatorOffset))
 
-                mstore(0x04, calldataload(idOffset))
+                mstore(0x24, calldataload(idOffset))
 
-                mstore(0x24, calldataload(operatorOffset))
-
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x64, 0x64, 0x20))
+                success := and(success, call(gas(), calldataload(tokenOffset), 0x00, 0x00, 0x64, 0x64, 0x20))
 
                 success := and(success, mload(0x64))
 
@@ -190,6 +193,7 @@ contract MassRevokeMod {
         }
     }
 
+    // TODO: directives
     /// @notice revokes operator approvals for erc-721 and erc-1155 tokens
     /// @dev directives:
     ///      01. check if caller is runner; cache as success
@@ -213,24 +217,24 @@ contract MassRevokeMod {
         assembly {
             let success := eq(caller(), sload(runner.slot))
 
-            success := and(success, eq(tokens.length, operators.length))
-
             let tokenOffset := tokens.offset
 
             let operatorOffset := operators.offset
+
+            let tokensEnd := add(tokenOffset, mul(tokens.length, 0x20))
+
+            success := and(success, eq(tokens.length, operators.length))
 
             mstore(0x00, 0xa22cb46500000000000000000000000000000000000000000000000000000000)
 
             mstore(0x44, 0x00)
 
             for { } 1 { } {
-                let token := calldataload(tokenOffset)
-
-                if iszero(token) { break }
+                if eq(tokenOffset, tokensEnd) { break }
 
                 mstore(0x04, calldataload(operatorOffset))
 
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x64, 0x00, 0x00))
+                success := and(success, call(gas(), calldataload(tokenOffset), 0x00, 0x00, 0x64, 0x00, 0x00))
 
                 tokenOffset := add(tokenOffset, 0x20)
 
@@ -243,6 +247,7 @@ contract MassRevokeMod {
         }
     }
 
+    // TODO: directives
     /// @notice revokes operator approvals for erc-6909 tokens
     /// @dev directives:
     ///      01. check if caller is runner; cache as success
@@ -264,24 +269,24 @@ contract MassRevokeMod {
         assembly {
             let success := eq(caller(), sload(runner.slot))
 
-            success := and(success, eq(tokens.length, operators.length))
-
             let tokenOffset := tokens.offset
 
             let operatorOffset := operators.offset
+
+            let tokensEnd := add(tokenOffset, mul(tokens.length, 0x20))
+
+            success := and(success, eq(tokens.length, operators.length))
 
             mstore(0x00, 0x558a729700000000000000000000000000000000000000000000000000000000)
 
             mstore(0x24, 0x00)
 
             for { } 1 { } {
-                let token := calldataload(tokenOffset)
-
-                if iszero(token) { break }
+                if eq(tokenOffset, tokensEnd) { break }
 
                 mstore(0x04, calldataload(operatorOffset))
 
-                success := and(success, call(gas(), token, 0x00, 0x00, 0x44, 0x44, 0x20))
+                success := and(success, call(gas(), calldataload(tokenOffset), 0x00, 0x00, 0x44, 0x44, 0x20))
 
                 success := and(success, mload(0x44))
 
