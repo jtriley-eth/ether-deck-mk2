@@ -1,19 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-struct Op4337 {
-    address sender;
-    uint256 nonce;
-    bytes initCode;
-    bytes callData;
-    bytes32 accountGasLimits;
-    uint256 preVerificationGas;
-    uint256 maxFeePerGas;
-    uint256 maxPriorityFeePerGas;
-    bytes paymasterAndData;
-    bytes signature;
-}
-
 /// @title Ether Deck Mk2 ERC-4337 User Operation Validation Mod
 /// @author jtriley.eth
 /// @notice implements erc-4337 account interface
@@ -21,6 +8,19 @@ contract Mod4337 {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
     uint256 internal nonce;
+
+    struct Op4337 {
+        address sender;
+        uint256 nonce;
+        bytes initCode;
+        bytes callData;
+        bytes32 accountGasLimits;
+        uint256 preVerificationGas;
+        uint256 maxFeePerGas;
+        uint256 maxPriorityFeePerGas;
+        bytes paymasterAndData;
+        bytes signature;
+    }
 
     /// @notice sets the entry point for user operations
     /// @dev directives:
