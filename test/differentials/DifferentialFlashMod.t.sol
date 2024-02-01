@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 pragma solidity 0.8.23;
 
-import { Test, console } from "../../lib/forge-std/src/Test.sol";
+import { Test } from "../../lib/forge-std/src/Test.sol";
 
 import { FlashMod } from "../../src/mods/FlashMod.sol";
 import { DifferentialFlashMod } from "./implementations/DifferentialFlashMod.sol";
