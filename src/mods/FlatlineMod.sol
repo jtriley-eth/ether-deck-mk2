@@ -19,7 +19,7 @@ contract FlatlineMod {
     /// @dev setting the interval to zero will disable the contingency
     /// @param receiver the address to receive the contingency
     /// @param interval the interval in seconds for the contingency
-    function setContingency(address receiver, uint32 interval) public {
+    function setContingency(address receiver, uint32 interval) external {
         assembly {
             if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
@@ -37,7 +37,7 @@ contract FlatlineMod {
     ///      04. store value in flatline slot
     /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.FlatlineSlot") - 1`
     /// @dev flatline value is defined as `receiver_u160 . interval_u32 . lastUpdate_u64`
-    function checkIn() public {
+    function checkIn() external {
         assembly {
             if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
@@ -59,7 +59,7 @@ contract FlatlineMod {
     ///      05. clear flatline slot
     /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.FlatlineSlot") - 1`
     /// @dev flatline value is defined as `receiver_u160 . interval_u32 . lastUpdate_u64`
-    function contingency() public {
+    function contingency() external {
         assembly {
             let value := sload(0x2baf74cad7040289b2b1fedcfd3140834838fbbf2e2d05fd8eb72bdb1660b9d0)
 
