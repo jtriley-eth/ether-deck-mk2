@@ -8,4 +8,3 @@ runs = 256
 [fmt]
 bracket_spacing = true
 multiline_func_header = "params_first"
-ignore = ["src/util/Sauce.sol"]
