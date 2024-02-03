@@ -165,8 +165,7 @@ contract FlatlineModTest is Test {
         flatlineMod.setContingency(receiver, interval);
 
         if (runner == actor) {
-            bytes32 value =
-                bytes32(uint256(uint160(receiver)) << 96 | uint256(interval) << 64 | uint256(startTime));
+            bytes32 value = bytes32(uint256(uint160(receiver)) << 96 | uint256(interval) << 64 | uint256(startTime));
             assertEq(value, vm.load(address(flatlineMod), flatlineSlot));
         }
     }
