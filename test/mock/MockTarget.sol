@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 contract MockTarget {
     bool internal throws;
 
-    constructor() payable {}
+    constructor() payable { }
 
     function setThrows(bool _throws) public {
         throws = _throws;

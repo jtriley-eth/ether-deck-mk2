@@ -10,7 +10,7 @@ contract MockERC721 {
     string public symbol;
     mapping(uint256 => string) public tokenURI;
     mapping(uint256 => address) public ownerOf;
-    mapping(address => uint256) internal balanceOf;
+    mapping(address => uint256) public balanceOf;
     mapping(uint256 => address) public getApproved;
     mapping(address => mapping(address => bool)) public isApprovedForAll;
 
@@ -20,21 +20,20 @@ contract MockERC721 {
         emit Transfer(address(0), to, id);
     }
 
-    function approve(address spender, uint256 id) public virtual {
+    function approve(address spender, uint256 id) public {
         address owner = ownerOf[id];
         require(msg.sender == owner || isApprovedForAll[owner][msg.sender]);
         getApproved[id] = spender;
         emit Approval(owner, spender, id);
     }
 
-    function setApprovalForAll(address operator, bool approved) public virtual {
+    function setApprovalForAll(address operator, bool approved) public {
         isApprovedForAll[msg.sender][operator] = approved;
         emit ApprovalForAll(msg.sender, operator, approved);
     }
 
-    function transferFrom(address from, address to, uint256 id) public virtual {
+    function transferFrom(address from, address to, uint256 id) public {
         require(from == ownerOf[id]);
-        require(to != address(0));
         require(msg.sender == from || isApprovedForAll[from][msg.sender] || msg.sender == getApproved[id]);
         balanceOf[from]--;
         balanceOf[to]++;
