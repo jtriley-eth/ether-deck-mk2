@@ -10,7 +10,9 @@ contract DifferentialFlatlineMod {
         require(msg.sender == runner);
         uint256 slot = flatlineSlot();
         uint256 value = pack(receiver, interval, uint64(block.timestamp));
-        assembly { sstore(slot, value) }
+        assembly {
+            sstore(slot, value)
+        }
     }
 
     function checkIn() public {
@@ -18,19 +20,25 @@ contract DifferentialFlatlineMod {
         uint256 slot = flatlineSlot();
         uint256 value;
 
-        assembly { value := sload(slot) }
+        assembly {
+            value := sload(slot)
+        }
 
-        (address receiver, uint32 interval, ) = unpack(value);
+        (address receiver, uint32 interval,) = unpack(value);
         value = pack(receiver, interval, uint64(block.timestamp));
 
-        assembly { sstore(slot, value) }
+        assembly {
+            sstore(slot, value)
+        }
     }
 
     function contingency() public {
         uint256 slot = flatlineSlot();
         uint256 value;
 
-        assembly { value := sload(slot) }
+        assembly {
+            value := sload(slot)
+        }
 
         (address receiver, uint32 interval, uint64 timestamp) = unpack(value);
 
@@ -39,11 +47,13 @@ contract DifferentialFlatlineMod {
         runner = receiver;
         value = 0;
 
-        assembly { sstore(slot, value) }
+        assembly {
+            sstore(slot, value)
+        }
     }
 
     function flatlineSlot() internal pure returns (uint256) {
-       return uint256(keccak256("EtherDeckMk2.FlatlineSlot")) - 1;
+        return uint256(keccak256("EtherDeckMk2.FlatlineSlot")) - 1;
     }
 
     function pack(address receiver, uint32 interval, uint64 timestamp) internal pure returns (uint256) {

@@ -10,9 +10,16 @@ contract DifferentialEtherDeckMk2 {
 
     function run(address target, bytes calldata payload) external payable {
         require(runner == msg.sender);
-        (bool success, bytes memory returndata) = target.call{value: msg.value}(payload);
-        if (success) assembly { return(add(0x20, returndata), mload(returndata)) }
-        else assembly { revert(add(0x20, returndata), mload(returndata)) }
+        (bool success, bytes memory returndata) = target.call{ value: msg.value }(payload);
+        if (success) {
+            assembly {
+                return(add(0x20, returndata), mload(returndata))
+            }
+        } else {
+            assembly {
+                revert(add(0x20, returndata), mload(returndata))
+            }
+        }
     }
 
     function runBatch(
@@ -24,7 +31,7 @@ contract DifferentialEtherDeckMk2 {
         require(targets.length == values.length);
         require(targets.length == payloads.length);
         for (uint256 i; i < targets.length; i++) {
-            (bool success,) = targets[i].call{value: values[i]}(payloads[i]);
+            (bool success,) = targets[i].call{ value: values[i] }(payloads[i]);
             require(success);
         }
     }
@@ -37,11 +44,18 @@ contract DifferentialEtherDeckMk2 {
 
         nonce++;
 
-        (bool success, bytes memory retdata) = target.call{value: msg.value}(payload);
-        (bool bribeSuccess,) = msg.sender.call{value: bribe}("");
+        (bool success, bytes memory retdata) = target.call{ value: msg.value }(payload);
+        (bool bribeSuccess,) = msg.sender.call{ value: bribe }("");
 
-        if (success && bribeSuccess) assembly { return(add(0x20, retdata), mload(retdata)) }
-        else assembly { revert(add(0x20, retdata), mload(retdata)) }
+        if (success && bribeSuccess) {
+            assembly {
+                return(add(0x20, retdata), mload(retdata))
+            }
+        } else {
+            assembly {
+                revert(add(0x20, retdata), mload(retdata))
+            }
+        }
     }
 
     function setDispatch(bytes4 selector, address target) external {
@@ -55,15 +69,24 @@ contract DifferentialEtherDeckMk2 {
 
         address mod = dispatch[selector];
 
-        if (mod == address(0)) assembly {
-            mstore(0x00, selector)
-            return(0x00, 0x20)
+        if (mod == address(0)) {
+            assembly {
+                mstore(0x00, selector)
+                return(0x00, 0x20)
+            }
         }
 
         (bool success, bytes memory retdata) = mod.delegatecall(msg.data);
 
-        if (success) assembly { return(add(0x20, retdata), mload(retdata)) }
-        else assembly { revert(add(0x20, retdata), mload(retdata)) }
+        if (success) {
+            assembly {
+                return(add(0x20, retdata), mload(retdata))
+            }
+        } else {
+            assembly {
+                revert(add(0x20, retdata), mload(retdata))
+            }
+        }
     }
 
     receive() external payable { }

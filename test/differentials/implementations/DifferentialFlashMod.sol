@@ -25,7 +25,9 @@ contract DifferentialFlashMod {
 
         bytes32 slot = keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashFeeSlotIndex")) - 1));
 
-        assembly { sstore(slot, factor) }
+        assembly {
+            sstore(slot, factor)
+        }
     }
 
     function maxFlashLoan(address token) external view returns (uint256) {
@@ -55,6 +57,8 @@ contract DifferentialFlashMod {
     function getFlashFeeFactor(address token) internal view returns (uint256 factor) {
         bytes32 slot = keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashFeeSlotIndex")) - 1));
 
-        assembly { factor := sload(slot) }
+        assembly {
+            factor := sload(slot)
+        }
     }
 }

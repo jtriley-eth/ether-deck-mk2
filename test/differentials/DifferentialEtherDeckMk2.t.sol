@@ -135,7 +135,9 @@ contract DifferentialEtherDeckMk2Test is Test {
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(actorPk, sighash);
         bytes memory sigdata = abi.encode(sighash, v, r, s);
         if (!validSig) {
-            sigdata = keccak256(invalidSigdata) == keccak256(sigdata) ? abi.encodePacked(invalidSigdata, uint8(0xff)) : invalidSigdata;
+            sigdata = keccak256(invalidSigdata) == keccak256(sigdata)
+                ? abi.encodePacked(invalidSigdata, uint8(0xff))
+                : invalidSigdata;
         }
 
         vm.startPrank(caller);

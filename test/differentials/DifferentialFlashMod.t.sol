@@ -72,12 +72,7 @@ contract DifferentialFlashModTest is Test {
         assertEq(supported ? amount : 0, slowFlash.maxFlashLoan(address(token)));
     }
 
-    function testFuzzDiffFlashFee(
-        address runner,
-        address token,
-        uint256 amount,
-        uint256 factor
-    ) public {
+    function testFuzzDiffFlashFee(address runner, address token, uint256 amount, uint256 factor) public {
         factor = bound(factor, 0, divisor);
 
         bool throws = factor == 0 || amount > type(uint256).max / factor;
@@ -119,7 +114,9 @@ contract DifferentialFlashModTest is Test {
         modBalance = bound(modBalance, 0, type(uint256).max / 4);
         receiverBalance = bound(receiverBalance, 0, type(uint256).max / 2 - modBalance);
         bool throws = factor == 0 || loanAmount > modBalance || loanAmount > type(uint256).max / factor;
-        unchecked { throws = throws || loanAmount * factor / divisor > receiverBalance; }
+        unchecked {
+            throws = throws || loanAmount * factor / divisor > receiverBalance;
+        }
 
         MockERC20 token = new MockERC20{ salt: salt }();
         MockFlashReceiver fastReceiver = new MockFlashReceiver{ salt: salt }();
