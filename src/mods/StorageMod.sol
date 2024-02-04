@@ -11,15 +11,15 @@ contract StorageMod {
 
     /// @notice writes storage in batch
     /// @dev directives:
-    ///      01. if caller is not runner, revert
+    ///      01. check if caller is runner and slots and values are equal length, revert if not
     ///      02. load slot offset; cache as slotOffset
     ///      03. load value offset; cache as valueOffset
-    ///      04. loop:
-    ///          a. load slot from calldata
-    ///          b. if slot is zero, break loop
-    ///          c. store value to slot
-    ///          d. increment slot offset
-    ///          e. increment value offset
+    ///      04. compute end of slots; cache as slotsEnd
+    ///      05. loop:
+    ///          a. if slotOffset is slotsEnd, break loop
+    ///          b. store value to slot
+    ///          c. increment slot offset
+    ///          d. increment value offset
     /// @param slots the slots to write
     /// @param values the values to write
     function write(bytes32[] calldata slots, bytes32[] calldata values) external {
@@ -30,12 +30,12 @@ contract StorageMod {
 
             let valueOffset := values.offset
 
+            let slotsEnd := add(slotOffset, mul(slots.length, 0x20))
+
             for { } 1 { } {
-                let slot := calldataload(slotOffset)
+                if eq(slotOffset, slotsEnd) { break }
 
-                if iszero(slot) { break }
-
-                sstore(slot, calldataload(valueOffset))
+                sstore(calldataload(slotOffset), calldataload(valueOffset))
 
                 slotOffset := add(slotOffset, 0x20)
 
@@ -46,39 +46,41 @@ contract StorageMod {
 
     /// @notice reads storage in batch
     /// @dev directives:
-    ///      01. load key offset; cache as keyOffset
+    ///      01. load slot offset; cache as slotOffset
     ///      02. load array offset; cache as arrayOffset
-    ///      03. store slots length in memory
-    ///      04. loop:
-    ///          a. load key from calldata
-    ///          b. if key is zero, break loop
-    ///          c. load value from storage; store in memory
-    ///          d. increment key offset
-    ///          e. increment array offset
-    ///      05. return array
+    ///      03. compute end of slots; cache as slotsEnd
+    ///      04. store slots length in memory
+    ///      05. loop:
+    ///          a. if slotOffset is slotsEnd, break loop
+    ///          b. move value from storage to memory
+    ///          c. increment key offset
+    ///          d. increment array offset
+    ///      06. return array
     /// @param slots the slots to read
     /// @return array the values read
     function read(bytes32[] calldata slots) external view returns (bytes32[] memory) {
         assembly {
-            let keyOffset := slots.offset
+            let slotOffset := slots.offset
 
-            let arrayOffset := 0x20
+            let arrayOffset := 0x40
 
-            mstore(0x00, slots.length)
+            let slotsEnd := add(slotOffset, mul(slots.length, 0x20))
+
+            mstore(0x00, 0x20)
+
+            mstore(0x20, slots.length)
 
             for { } 1 { } {
-                let key := calldataload(keyOffset)
+                if eq(slotOffset, slotsEnd) { break }
 
-                if iszero(key) { break }
+                mstore(arrayOffset, sload(calldataload(slotOffset)))
 
-                mstore(arrayOffset, sload(key))
-
-                keyOffset := add(keyOffset, 0x20)
+                slotOffset := add(slotOffset, 0x20)
 
                 arrayOffset := add(arrayOffset, 0x20)
             }
 
-            return(0x00, add(0x20, shr(0x05, slots.length)))
+            return(0x00, add(0x40, mul(slots.length, 0x20)))
         }
     }
 }
