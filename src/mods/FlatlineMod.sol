@@ -10,7 +10,7 @@ contract FlatlineMod {
     uint256 internal nonce;
 
     /// @notice sets contingency
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; revert if not
     ///      02. bitpack receiver, interval, and current timestamp into value
     ///      03. store value in flatline slot
@@ -30,7 +30,7 @@ contract FlatlineMod {
     }
 
     /// @notice checks in, sets lastUpdate to current timestamp
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; revert if not
     ///      02. load value from flatline slot; cache as value
     ///      03. mask lastUpdate from value, set to current timestamp; cache as value
@@ -50,7 +50,7 @@ contract FlatlineMod {
     }
 
     /// @notice executes contingency
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. load value from flatline slot; cache as value
     ///      02. mask last update from value; cache as lastUpdate
     ///      03. mask interval from value; cache as interval

@@ -10,7 +10,7 @@ contract CreatorMod {
     uint256 internal nonce;
 
     /// @notice creates a contract with value and initcode
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as succes
     ///      02. copy initcode to memory
     ///      03. create contract; cache as deployment
@@ -41,7 +41,7 @@ contract CreatorMod {
     }
 
     /// @notice creates a contract with salt, value, and initcode
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. check if caller is runner; cache as success
     ///      02. copy initcode to memory
     ///      03. create contract; cache as deployment
@@ -73,7 +73,7 @@ contract CreatorMod {
     }
 
     /// @notice computes the address of a contract with salt and initcode
-    /// @dev Directives:
+    /// @dev directives:
     ///      01. copy initcode in memory
     ///      02. hash initcode, store in memory
     ///      03. store salt in memory
