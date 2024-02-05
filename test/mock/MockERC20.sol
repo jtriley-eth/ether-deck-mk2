@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.23;
+pragma solidity 0.8.24;
 
 contract MockERC20 {
     event Transfer(address indexed sender, address indexed receiver, uint256 amount);

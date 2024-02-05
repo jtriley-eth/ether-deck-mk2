@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.23;
+pragma solidity 0.8.24;
 
 interface IERC1155TokenReceiver {
     function onERC1155Received(address, address, uint256, uint256, bytes calldata) external returns (bytes4);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.23;
+pragma solidity 0.8.24;
 
 contract MockERC6909 {
     event OperatorSet(address indexed owner, address indexed operator, bool approved);

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL-3.0-only
-pragma solidity 0.8.23;
+pragma solidity 0.8.24;
 
 import { MockERC20 } from "../../mock/MockERC20.sol";
 import { MockERC721 } from "../../mock/MockERC721.sol";
