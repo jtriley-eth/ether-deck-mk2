@@ -30,11 +30,21 @@ flowchart LR
 // -- snip --
     mapping(bytes4 => address) public dispatch;
     address public runner;
-    uint256 public nonce;
 // -- snip --
 ```
 
-The core deck storage layout occupies three storage slots in accordance with solidity's
+```mermaid
+flowchart LR
+    e{EtherDeckMk2}
+    e --> dispatch
+    e --> runner([runner])
+
+    dispatch --> lo(["bytes4(0x00000000)"])
+    dispatch --> mid(["bytes4(0x........)"])
+    dispatch --> hi(["bytes4(0xFFFFFFFF)"])
+```
+
+The core deck storage layout occupies two storage slots in accordance with solidity's
 storage layout rules.
 
 #### `dispatch`
@@ -46,11 +56,6 @@ are authorized to mutate the deck. all dispatchers must be enabled by the deck's
 #### `runner`
 
 Slot one is occupied by a `runner` address, the account authorized to run actions on the deck.
-
-#### `nonce`
-
-Slot two is occupied by a `nonce` value, the nonce associated with [`runner`](#runner)'s delegated
-calls count.
 
 ### ABI
 
@@ -81,24 +86,6 @@ values.
 Reverts if the caller is not the [`runner`](#runner), the number of targets, values, and payloads
 are inequal, or if any one of the calls fails.
 
-#### `runFrom`
-
-```solidity
-function runFrom(
-    address target,
-    bytes calldata payload,
-    bytes calldata sigdata,
-    uint256 bribe
-) external payable
-```
-
-The `runFrom` function makes an external call form the deck with a designated target, payload, and
-value and pays the caller a designated bribe to run the transaction on behalf of the `runner`.
-
-Reverts if the elliptic curve public key recovery fails, the signer is not the runner, the signed
-hash does not match the payload, target, call value, bribe, and [`nonce`](#nonce), the bribe fails,
-or the call fails.
-
 #### `setDispatch`
 
 ```solidity
@@ -110,7 +97,20 @@ given selector.
 
 Logs the [`DispatchSet`](#dispatchset) event.
 
-Reverts if the caller is not the [`runner`](#runner)
+Reverts if the caller is not the [`runner`](#runner).
+
+#### `setDispatchBatch`
+
+```solidity
+function setDispatchBatch(bytes4[] calldata selectors, address[] calldata targets) external;
+```
+
+The `setDispatchBatch` function sets an array of target mods in the [`dispatch`](#dispatch) mapping
+based on the provided selector array.
+
+Logs the [`DispatchSet`](#dispatchset) event.
+
+Reverts if the caller is not the [`runner`](#runner).
 
 #### `fallback`
 
@@ -149,34 +149,102 @@ Mods are contracts that may be delegate called by the deck to extend its functio
 may be set as a mod for the deck, though serious [security considerations](#security-considerations)
 must be taken before setting mods to the deck.
 
-### Creator Mod
+### Existing Mods
 
-> todo
+- [`BribeMod`](src/mods/BribeMod.sol): A mod for bribing external parties to run transactions on the runner's behalf.
+- [`CreatorMod`](src/mods/CreatorMod.sol): A mod for creating contracts.
+- [`FlashMod`](src/mods/FlashMod.sol): A mod for issuing ERC-3156 flashloans to external parties.
+- [`FlatlineMod`](src/mods/FlatlineMod.sol): A mod for using a deadman's switch.
+- [`MassRevokeMod`](src/mods/MassRevokeMod.sol): A mod for revoking approvals and operators in batch.
+- [`MassTransferMod`](src/mods/MassTransferMod.sol): A mod for transferring in batch.
+- [`Mod4337`](src/mods/Mod4337.sol): A mod for ERC-4337 compliance.
+- [`StorageMod`](src/mods/StorageMod.sol): A mod for reading and writing storage slots in batch.
+- [`TwoStepTransitionMod`](src/mods/TwoStepTransitionMod.sol): A mod for two-step runner transitions.
 
-### Flash Mod
+## Mod Registry
 
-> todo
+The mod registry stores mods with name and address lookups.
 
-### Mass Revoke Mod
+### ABI
 
-> todo
+#### `authority`
 
-### Mass Transfer Mod
+```solidity
+function authority() external view returns (address);
+```
 
-> todo
+The `authority` function returns the address with authority to mutate the mod factory.
 
-### Mod 4337
+#### `searchByName`
 
-> todo
+```solidity
+function searchByName(string calldata) external view returns (address);
+```
 
-### Storage Mod
+The `searchByName` function returns the address of a given named mod.
 
-> todo
+#### `searchByAddress`
 
-### Two Step Transition Mod
+```solidity
+function searchByAddress(address) external view returns (string memory);
+```
 
-> todo
+The `searchByAddress` function returns the name of a given mod address.
+
+#### `transferAuthority`
+
+```solidity
+function transferAuthority(address newAuthority) external;
+```
+
+The `transferAuthority` function sets the new authority.
+
+Logs the [`AuthoritySet`](#authorityset) event.
+
+Reverts if the caller is not the [`authority`](#authority).
+
+#### `register`
+
+```solidity
+function register(address modAddress, string calldata modName) external;
+```
+
+The `register` function writes to [`searchByName`](#searchbyname) and
+[`searchByAddress`](#searchbyaddress) for a given mod address and name.
+
+Logs the [`ModRegistered`](#modregistered) event.
+
+Reverts if the caller is not the [`authority`](#authority).
+
+### Events
+
+#### `AuthorityTransferred`
+
+```solidity
+event AuthorityTransferred(address indexed newAuthority);
+```
+
+The `AuthorityTransferred` event is logged when [`transferAuthority`](#transferauthority) is called.
+
+#### `ModRegistered`
+
+```solidity
+event ModRegistered(address indexed addr, string name);
+```
+
+The `ModRegistered` event is logged on when [`register`](#register) is called.
 
 ## Security Considerations
 
-> todo
+> todo: document invariants and assumptions of all mods.
+
+### Mods
+
+Mods have full write access to the deck via `delegatecall`.
+
+Per convention, mods that require their own storage must namespace storage using a keccak hash minus
+one.
+
+```solidity
+uint256 storageSlot = uint256(keccak256("EtherDeckMk2.<storage_name>")) - 1;
+```
