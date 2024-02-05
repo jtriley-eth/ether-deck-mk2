@@ -41,6 +41,16 @@ contract DifferentialEtherDeckMk2 {
         emit DispatchSet(selector, target);
     }
 
+    function setDispatchBatch(bytes4[] calldata selectors, address[] calldata targets) external {
+        require(msg.sender == runner);
+        require(selectors.length == targets.length);
+
+        for (uint256 i; i < selectors.length; i++) {
+            dispatch[selectors[i]] = targets[i];
+            emit DispatchSet(selectors[i], targets[i]);
+        }
+    }
+
     fallback() external payable {
         bytes4 selector = msg.sig;
 

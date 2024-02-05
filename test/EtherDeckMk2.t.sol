@@ -184,6 +184,59 @@ contract EtherDeckMk2Test is Test {
         assertEq(deck.dispatch(defaultSelector), mockTarget);
     }
 
+    function testSetDispatchNotRunner() public asPaidActor(alice, 0) {
+        vm.expectRevert();
+
+        vm.startPrank(bob);
+        deck.setDispatch(defaultSelector, mockTarget);
+        vm.stopPrank();
+    }
+
+    function testSetDispatchBatchSingle() public asPaidActor(alice, 0) {
+        bytes4[] memory selectors = new bytes4[](1);
+        selectors[0] = 0x11111111;
+
+        address[] memory targets = new address[](1);
+        targets[0] = address(1);
+
+        deck.setDispatchBatch(selectors, targets);
+
+        assertEq(deck.dispatch(selectors[0]), targets[0]);
+    }
+
+    function testSetDispatchBatchDouble() public asPaidActor(alice, 0) {
+        bytes4[] memory selectors = new bytes4[](2);
+        selectors[0] = 0x11111111;
+        selectors[1] = 0x22222222;
+
+        address[] memory targets = new address[](2);
+        targets[0] = address(1);
+        targets[1] = address(2);
+
+        deck.setDispatchBatch(selectors, targets);
+
+        assertEq(deck.dispatch(selectors[0]), targets[0]);
+        assertEq(deck.dispatch(selectors[1]), targets[1]);
+    }
+
+    function testSetDispatchBatchEmpty() public asPaidActor(alice, 0) {
+        deck.setDispatchBatch(new bytes4[](0), new address[](0));
+    }
+
+    function testSetDispatchBatchLengthMismatch() public asPaidActor(alice, 0) {
+        vm.expectRevert();
+
+        deck.setDispatchBatch(new bytes4[](0), new address[](1));
+    }
+
+    function testSetDispatchBatchNotRunner() public asPaidActor(alice, 0) {
+        vm.expectRevert();
+
+        vm.startPrank(bob);
+        deck.setDispatchBatch(new bytes4[](0), new address[](0));
+        vm.stopPrank();
+    }
+
     function testDispatch() public asPaidActor(alice, 0) {
         deck.setDispatch(MockMod.runMod.selector, mockMod);
 
@@ -297,6 +350,48 @@ contract EtherDeckMk2Test is Test {
             assertEq(deck.dispatch(selector), target);
         } else {
             assertEq(deck.dispatch(selector), address(0));
+        }
+    }
+
+    function testFuzzSetDispatchBatch(
+        bool runnerIsActor,
+        address runner,
+        address actor,
+        address[] memory targets,
+        bool lengthMismatch
+    ) public {
+        runner = runnerIsActor ? actor : runner;
+
+        vm.store(address(deck), bytes32(uint256(1)), bytes32(uint256(uint160(runner))));
+
+        bytes4[] memory selectors = new bytes4[](lengthMismatch ? targets.length + 1 : targets.length);
+
+        for (uint256 i; i < targets.length; i++) {
+            selectors[i] = bytes4(keccak256(abi.encode(targets[i])));
+        }
+
+        bool selectorCollision;
+        for (uint256 i; i < selectors.length; i++) {
+            for (uint256 j; j < selectors.length; j++) {
+                if (i != j && selectors[i] == selectors[j]) {
+                    selectorCollision = true;
+                }
+            }
+        }
+        vm.assume(!selectorCollision);
+
+        if (lengthMismatch || runner != actor) {
+            vm.expectRevert();
+        }
+
+        vm.startPrank(actor);
+        deck.setDispatchBatch(selectors, targets);
+        vm.stopPrank();
+
+        if (!lengthMismatch && runner == actor) {
+            for (uint256 i; i < targets.length; i++) {
+                assertEq(deck.dispatch(selectors[i]), targets[i]);
+            }
         }
     }
 

@@ -141,6 +141,56 @@ contract EtherDeckMk2 {
         }
     }
 
+    /// @notice sets the dispatcher of an array of selector to target addresses
+    /// @dev directives:
+    ///      01. check if caller is runner; cache as success
+    ///      02. check success and that selectors and targets length match, revert if not
+    ///      03. load selector offset; cache as selectorPtr
+    ///      04. load target offset; cache as targetPtr
+    ///      05. compute end of selectors; cache as selectorsEnd
+    ///      06. loop:
+    ///          a. if selectorPtr is selectorsEnd, break loop
+    ///          b. load selector from calldata; cache as selector
+    ///          c. load target from calldata; cache as target
+    ///          d. store selector in memory
+    ///          e. store target in storage at `dispatch[selector]`
+    ///          f. log dispatch set
+    ///          g. increment selector offset
+    ///          h. increment target offset
+    function setDispatchBatch(bytes4[] calldata selectors, address[] calldata targets) external {
+        assembly {
+            let success := eq(caller(), sload(runner.slot))
+
+            if iszero(and(success, eq(selectors.length, targets.length))) { revert(0x00, 0x00) }
+
+            let selectorPtr := selectors.offset
+
+            let targetPtr := targets.offset
+
+            let selectorsEnd := add(selectors.offset, mul(selectors.length, 0x20))
+
+            success := and(success, eq(selectors.length, targets.length))
+
+            for { } 1 { } {
+                if eq(selectorPtr, selectorsEnd) { break }
+
+                let selector := calldataload(selectorPtr)
+
+                let target := calldataload(targetPtr)
+
+                mstore(0x00, selector)
+
+                sstore(keccak256(0x00, 0x40), target)
+
+                log3(0x00, 0x00, 0x2c0b629fc2b386c229783b88b245e8730c1397b78e4dd4a43cd7aafdf1b39f12, selector, target)
+
+                selectorPtr := add(selectorPtr, 0x20)
+
+                targetPtr := add(targetPtr, 0x20)
+            }
+        }
+    }
+
     /// @notice receives data from arbitrary context
     /// @dev directives:
     ///      01. moves selector from calldata to memory

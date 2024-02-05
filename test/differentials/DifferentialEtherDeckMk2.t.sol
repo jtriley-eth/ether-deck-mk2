@@ -125,6 +125,53 @@ contract DifferentialEtherDeckMk2Test is Test {
         assertEq(slowDeck.dispatch(selector), target);
     }
 
+    function testFuzzDiffSetDispatchBatch(
+        bool runnerIsActor,
+        address runner,
+        address actor,
+        address[] memory targets,
+        bool lengthMismatch
+    ) public {
+        runner = runnerIsActor ? actor : runner;
+        setRunner(runner);
+
+        bytes4[] memory selectors = new bytes4[](lengthMismatch ? targets.length + 1 : targets.length);
+
+        for (uint256 i; i < selectors.length; i++) {
+            selectors[i] = bytes4(keccak256(abi.encode(i)));
+        }
+
+        bool selectorCollision;
+        for (uint256 i; i < selectors.length; i++) {
+            for (uint256 j; j < selectors.length; j++) {
+                if (i != j && selectors[i] == selectors[j]) {
+                    selectorCollision = true;
+                }
+            }
+        }
+        vm.assume(!selectorCollision);
+
+        vm.startPrank(actor);
+
+        if (lengthMismatch || runner != actor) {
+            vm.expectRevert();
+            fastDeck.setDispatchBatch(selectors, targets);
+
+            vm.expectRevert();
+            slowDeck.setDispatchBatch(selectors, targets);
+        } else {
+            fastDeck.setDispatchBatch(selectors, targets);
+            slowDeck.setDispatchBatch(selectors, targets);
+
+            for (uint256 i; i < targets.length; i++) {
+                assertEq(fastDeck.dispatch(selectors[i]), targets[i]);
+                assertEq(slowDeck.dispatch(selectors[i]), targets[i]);
+            }
+        }
+
+        vm.stopPrank();
+    }
+
     function testFuzzDiffDispatch(
         bool runnerIsActor,
         address runner,
