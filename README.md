@@ -6,13 +6,11 @@ A reasonably optimized, extensible smart account.
 flowchart LR
     u{{User}}
     e{Ether Deck Mk2}
-    r{{Relayer}}
 
-    u --> r
     u -->|call| run --> e
     u -->|call| runBatch --> e
-    r -->|call| runFrom --> e
     u -->|call| setDispatch --> e
+    u -->|call| setBatchDispatch --> e
 
     e --> mods
     e -->|call| target([Target])
