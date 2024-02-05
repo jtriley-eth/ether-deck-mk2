@@ -4,8 +4,7 @@ The following documents the style guide for writing code on the Ether Deck Mk2.
 
 ## Principles
 
-**Only Assembly:** Assembly is pure, it contains no hidden control flow. All
-business logic is written in assembly.
+**Only Assembly:** All business logic is written in assembly.
 
 **High Function, Higher Form:** Optimize where possible, but prefer
 form over optimization where optimization conflicts with the remainder of the
