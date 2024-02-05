@@ -14,7 +14,6 @@ interface IFlashReceiver {
 contract DifferentialFlashMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     uint256 internal constant divisor = 10_000;
 

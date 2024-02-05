@@ -8,7 +8,6 @@ pragma solidity 0.8.23;
 contract MassTransferMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     /// @notice transfers erc-20 tokens
     /// @dev directives:

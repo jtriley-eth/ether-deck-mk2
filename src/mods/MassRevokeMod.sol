@@ -8,7 +8,6 @@ pragma solidity 0.8.23;
 contract MassRevokeMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     /// @notice revokes approvals for erc-20 tokens
     /// @dev directives:

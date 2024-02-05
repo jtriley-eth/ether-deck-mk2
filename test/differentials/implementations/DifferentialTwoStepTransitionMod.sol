@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 contract DifferentialTwoStepTransitionMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     function startRunnerTransition(address newRunner) external {
         require(msg.sender == runner);

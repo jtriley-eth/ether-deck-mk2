@@ -4,7 +4,7 @@ pragma solidity 0.8.23;
 contract MockMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
+    uint256 internal __padding;
     bool internal throws;
 
     event RunMod();

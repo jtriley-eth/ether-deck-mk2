@@ -106,62 +106,6 @@ contract DifferentialEtherDeckMk2Test is Test {
         vm.stopPrank();
     }
 
-    function testFuzzDiffRunFrom(
-        bool runnerIsActor,
-        address runner,
-        uint256 actorPk,
-        address caller,
-        bytes32 salt,
-        uint256 value,
-        uint256 bribe,
-        bytes calldata payload,
-        bool validSig,
-        bytes calldata invalidSigdata
-    ) public {
-        actorPk = boundPk(actorPk);
-        address actor = vm.addr(actorPk);
-        runner = runnerIsActor ? actor : runner;
-
-        address target = address(new MockTarget{ salt: salt }());
-        value = bound(value, 0, type(uint256).max / 4);
-        bribe = bound(bribe, 0, type(uint256).max / 4);
-
-        setRunner(runner);
-        vm.deal(caller, value * 2);
-        vm.deal(address(fastDeck), bribe);
-        vm.deal(address(slowDeck), bribe);
-
-        bytes32 sighash = keccak256(abi.encodePacked(payload, uint256(uint160(target)), value, bribe, fastDeck.nonce()));
-        (uint8 v, bytes32 r, bytes32 s) = vm.sign(actorPk, sighash);
-        bytes memory sigdata = abi.encode(sighash, v, r, s);
-        if (!validSig) {
-            sigdata = keccak256(invalidSigdata) == keccak256(sigdata)
-                ? abi.encodePacked(invalidSigdata, uint8(0xff))
-                : invalidSigdata;
-        }
-
-        vm.startPrank(caller);
-
-        if (validSig && actor == runner) {
-            fastDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
-            slowDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
-
-            assertEq(actor.balance, 0);
-            assertEq(caller.balance, bribe * 2);
-            assertEq(address(fastDeck).balance, 0);
-            assertEq(address(slowDeck).balance, 0);
-            assertEq(target.balance, value * 2);
-        } else {
-            vm.expectRevert();
-            fastDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
-
-            vm.expectRevert();
-            slowDeck.runFrom{ value: value }(target, payload, sigdata, bribe);
-        }
-
-        vm.stopPrank();
-    }
-
     function testFuzzDiffSetDispatch(
         bool runnerIsActor,
         address runner,
@@ -203,10 +147,6 @@ contract DifferentialEtherDeckMk2Test is Test {
 
         assertEq(fastSucc, slowSucc);
         assertEq(keccak256(fastret), keccak256(slowret));
-    }
-
-    function boundPk(uint256 pk) internal pure returns (uint256) {
-        return bound(pk, 1, 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364140);
     }
 
     function setRunner(address runner) internal {

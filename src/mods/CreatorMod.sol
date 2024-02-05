@@ -7,7 +7,6 @@ pragma solidity 0.8.23;
 contract CreatorMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     /// @notice creates a contract with value and initcode
     /// @dev directives:

@@ -9,7 +9,6 @@ import { MockERC6909 } from "../../mock/MockERC6909.sol";
 contract DifferentialMassRevokeMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     function revokeERC20Approval(address[] calldata tokens, address[] calldata spenders) external {
         require(msg.sender == runner);

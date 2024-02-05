@@ -6,7 +6,6 @@ contract DifferentialEtherDeckMk2 {
 
     mapping(bytes4 => address) public dispatch;
     address public runner;
-    uint256 public nonce;
 
     function run(address target, bytes calldata payload) external payable {
         require(runner == msg.sender);
@@ -33,28 +32,6 @@ contract DifferentialEtherDeckMk2 {
         for (uint256 i; i < targets.length; i++) {
             (bool success,) = targets[i].call{ value: values[i] }(payloads[i]);
             require(success);
-        }
-    }
-
-    function runFrom(address target, bytes calldata payload, bytes calldata sigdata, uint256 bribe) external payable {
-        (bytes32 hash, uint8 v, bytes32 r, bytes32 s) = abi.decode(sigdata, (bytes32, uint8, bytes32, bytes32));
-
-        require(hash == keccak256(abi.encodePacked(payload, uint256(uint160(target)), msg.value, bribe, nonce)));
-        require(runner == ecrecover(hash, v, r, s));
-
-        nonce++;
-
-        (bool success, bytes memory retdata) = target.call{ value: msg.value }(payload);
-        (bool bribeSuccess,) = msg.sender.call{ value: bribe }("");
-
-        if (success && bribeSuccess) {
-            assembly {
-                return(add(0x20, retdata), mload(retdata))
-            }
-        } else {
-            assembly {
-                revert(add(0x20, retdata), mload(retdata))
-            }
         }
     }
 

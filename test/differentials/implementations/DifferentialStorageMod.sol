@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 contract DifferentialStorageMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     function write(bytes32[] calldata slots, bytes32[] calldata values) external {
         require(msg.sender == runner);

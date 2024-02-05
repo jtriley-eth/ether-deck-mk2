@@ -7,7 +7,6 @@ pragma solidity 0.8.23;
 contract FlatlineMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     /// @notice sets contingency
     /// @dev directives:

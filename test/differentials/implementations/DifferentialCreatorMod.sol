@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 contract DifferentialCreatorMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     function create(uint256 value, bytes memory initcode) external payable returns (address deployment) {
         require(msg.sender == runner);

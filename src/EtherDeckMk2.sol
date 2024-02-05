@@ -18,9 +18,6 @@ contract EtherDeckMk2 {
     /// @notice runner of calls
     address public runner;
 
-    /// @notice nonce of runner
-    uint256 public nonce;
-
     constructor() {
         assembly {
             sstore(runner.slot, caller())
@@ -120,64 +117,6 @@ contract EtherDeckMk2 {
             if success { return(0x00, 0x00) }
 
             revert(0x00, 0x00)
-        }
-    }
-
-    /// @notice runs a call on behalf of the runner
-    /// @dev directives:
-    ///      01. copy sigdata to memory
-    ///      02. ecrecover; cache as success
-    ///      03. check if recovered address is runner; compose success
-    ///      04. copy payload to memory
-    ///      05. store target after payload in memory
-    ///      06. store callvalue after target in memory
-    ///      07. store bribe after callvalue in memory
-    ///      08. load nonce from storage; cache as sigNonce
-    ///      09. store nonce after payload, target, callvalue, and bribe in memory
-    ///      10. check if hash matches sigdata hash; compose success
-    ///      11. store incremented nonce in storage
-    ///      12. make external call to caller with bribe; compose success
-    ///      13. make external call to target with callvalue and payload; compose success
-    ///      14. copy returndata to memory
-    ///      15. if success, return with returndata
-    ///      16. else, revert with revertdata
-    /// @dev sighash is `keccak256(abi.encode(payload, target, callvalue, bribe, nonce))`
-    /// @param target the call target address
-    /// @param payload the call payload
-    /// @param sigdata the ecrecover signature data
-    function runFrom(address target, bytes calldata payload, bytes calldata sigdata, uint256 bribe) external payable {
-        assembly {
-            calldatacopy(0x00, sigdata.offset, sigdata.length)
-
-            let success := staticcall(gas(), 0x01, 0x00, sigdata.length, 0x00, 0x20)
-
-            success := and(success, eq(mload(0x00), sload(runner.slot)))
-
-            calldatacopy(0x00, payload.offset, payload.length)
-
-            mstore(payload.length, target)
-
-            mstore(add(0x20, payload.length), callvalue())
-
-            mstore(add(0x40, payload.length), bribe)
-
-            let sigNonce := sload(nonce.slot)
-
-            mstore(add(0x60, payload.length), sigNonce)
-
-            success := and(success, eq(keccak256(0x00, add(0x80, payload.length)), calldataload(sigdata.offset)))
-
-            sstore(nonce.slot, add(sigNonce, 0x01))
-
-            success := and(success, call(gas(), caller(), bribe, 0x00, 0x00, 0x00, 0x00))
-
-            success := and(success, call(gas(), target, callvalue(), 0x00, payload.length, 0x00, 0x00))
-
-            returndatacopy(0x00, 0x00, returndatasize())
-
-            if success { return(0x00, returndatasize()) }
-
-            revert(0x00, returndatasize())
         }
     }
 

@@ -9,7 +9,6 @@ import { MockERC6909 } from "../../mock/MockERC6909.sol";
 contract DifferentialMassTransferMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     function transferERC20(
         address[] calldata tokens,

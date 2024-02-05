@@ -4,7 +4,6 @@ pragma solidity 0.8.23;
 contract DifferentialFlatlineMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
-    uint256 internal nonce;
 
     function setContingency(address receiver, uint32 interval) public {
         require(msg.sender == runner);
