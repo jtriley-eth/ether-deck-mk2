@@ -74,7 +74,12 @@ contract BribeMod {
     /// @param target the call target address
     /// @param payload the call payload
     /// @param sigdata the ecrecover signature data
-    function bribeCaller(address target, bytes calldata payload, bytes calldata sigdata, uint256 bribe) external payable {
+    function bribeCaller(
+        address target,
+        bytes calldata payload,
+        bytes calldata sigdata,
+        uint256 bribe
+    ) external payable {
         assembly {
             calldatacopy(0x00, sigdata.offset, sigdata.length)
 

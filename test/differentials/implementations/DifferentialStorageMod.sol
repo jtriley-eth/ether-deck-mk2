@@ -12,7 +12,9 @@ contract DifferentialStorageMod {
         for (uint256 i; i < slots.length; i++) {
             bytes32 slot = slots[i];
             bytes32 value = values[i];
-            assembly { sstore(slot, value) }
+            assembly {
+                sstore(slot, value)
+            }
         }
     }
 
@@ -22,7 +24,9 @@ contract DifferentialStorageMod {
         for (uint256 i; i < slots.length; i++) {
             bytes32 slot = slots[i];
             bytes32 value;
-            assembly { value := sload(slot) }
+            assembly {
+                value := sload(slot)
+            }
             values[i] = value;
         }
     }

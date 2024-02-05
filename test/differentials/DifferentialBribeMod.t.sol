@@ -89,7 +89,8 @@ contract DifferentialBribeModTest is Test {
         vm.deal(address(fastBribeMod), bribe);
         vm.deal(address(slowBribeMod), bribe);
 
-        bytes32 sighash = keccak256(abi.encodePacked(payload, uint256(uint160(target)), value, bribe, fastBribeMod.nonce()));
+        bytes32 sighash =
+            keccak256(abi.encodePacked(payload, uint256(uint160(target)), value, bribe, fastBribeMod.nonce()));
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(actorPk, sighash);
         bytes memory sigdata = abi.encode(sighash, v, r, s);
         if (!validSig) {

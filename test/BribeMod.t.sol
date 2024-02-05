@@ -90,8 +90,9 @@ contract BribeModTest is Test {
         vm.deal(address(bribeMod), defaultValue);
 
         bytes memory payload = hex"aabbccdd";
-        bytes32 sighash =
-            keccak256(abi.encodePacked(payload, uint256(uint160(mockTarget)), defaultValue, defaultValue, bribeMod.nonce()));
+        bytes32 sighash = keccak256(
+            abi.encodePacked(payload, uint256(uint160(mockTarget)), defaultValue, defaultValue, bribeMod.nonce())
+        );
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, sighash);
         bytes memory sigdata = abi.encode(sighash, v, r, s);
@@ -113,8 +114,9 @@ contract BribeModTest is Test {
         vm.deal(address(bribeMod), defaultValue);
 
         bytes memory payload = hex"aabbccdd";
-        bytes32 sighash =
-            keccak256(abi.encodePacked(payload, uint256(uint160(mockTarget)), defaultValue, defaultValue, bribeMod.nonce()));
+        bytes32 sighash = keccak256(
+            abi.encodePacked(payload, uint256(uint160(mockTarget)), defaultValue, defaultValue, bribeMod.nonce())
+        );
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, sighash);
         bytes memory sigdata = abi.encode(sighash, v, r, s);
@@ -150,8 +152,9 @@ contract BribeModTest is Test {
         vm.deal(alice, defaultValue);
 
         bytes memory payload = hex"aabbccdd";
-        bytes32 sighash =
-            keccak256(abi.encodePacked(payload, uint256(uint160(mockTarget)), defaultValue, defaultValue, bribeMod.nonce()));
+        bytes32 sighash = keccak256(
+            abi.encodePacked(payload, uint256(uint160(mockTarget)), defaultValue, defaultValue, bribeMod.nonce())
+        );
 
         (uint8 v, bytes32 r, bytes32 s) = vm.sign(1, sighash);
         bytes memory sigdata = abi.encode(sighash, v, r, s);

@@ -238,7 +238,7 @@ contract MassTransferMod {
     ///      02. load token offset; cache as tokenOffset
     ///      03. load receiver offset; cache as receiverOffset
     ///      04. load id offset; cache as idOffset
-    ///      05. load amount offset; cache as 
+    ///      05. load amount offset; cache as
     ///      06. compute end of tokens; cache as tokensEnd
     ///      07. check if tokens and receivers are equal length; compose success
     ///      08. check if tokens and ids are equal length; compose success

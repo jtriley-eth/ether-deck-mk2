@@ -7,7 +7,9 @@ contract DifferentialBribeMod {
 
     function nonce() public view returns (uint256 value) {
         uint256 slot = uint256(keccak256("EtherDeckMk2.Nonce")) - 1;
-        assembly { value := sload(slot) }
+        assembly {
+            value := sload(slot)
+        }
     }
 
     function bribeBuilder(address target, bytes calldata payload, uint256 bribe) external payable {
@@ -24,7 +26,12 @@ contract DifferentialBribeMod {
         }
     }
 
-    function bribeCaller(address target, bytes calldata payload, bytes calldata sigdata, uint256 bribe) external payable {
+    function bribeCaller(
+        address target,
+        bytes calldata payload,
+        bytes calldata sigdata,
+        uint256 bribe
+    ) external payable {
         (bytes32 hash, uint8 v, bytes32 r, bytes32 s) = abi.decode(sigdata, (bytes32, uint8, bytes32, bytes32));
         uint256 sigNonce = nonce();
 
@@ -33,7 +40,9 @@ contract DifferentialBribeMod {
 
         uint256 nonceSlot = uint256(keccak256("EtherDeckMk2.Nonce")) - 1;
         sigNonce += 1;
-        assembly { sstore(nonceSlot, sigNonce) }
+        assembly {
+            sstore(nonceSlot, sigNonce)
+        }
 
         (bool success, bytes memory retdata) = target.call{ value: msg.value }(payload);
         (bool bribeSuccess,) = msg.sender.call{ value: bribe }("");

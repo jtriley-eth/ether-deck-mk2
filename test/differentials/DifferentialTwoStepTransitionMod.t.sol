@@ -79,7 +79,6 @@ contract DifferentialTwoStepTransitionModTest is Test {
             assertEq(vm.load(address(fastTwoStepMod), bytes32(uint256(1))), bytes32(uint256(uint160(newRunner))));
             assertEq(vm.load(address(slowTwoStepMod), bytes32(uint256(1))), bytes32(uint256(uint160(newRunner))));
         }
-
     }
 
     function setRunner(address runner) internal {
