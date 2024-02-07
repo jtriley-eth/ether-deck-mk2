@@ -232,9 +232,24 @@ event ModRegistered(address indexed addr, string name);
 
 The `ModRegistered` event is logged on when [`register`](#register) is called.
 
-## Security Considerations
+## Security
 
-> todo: document invariants and assumptions of all mods.
+Invariants:
+
+- no slots collide except when `StorageMod.write` is used
+- no slot may be written without the explicit consent of the `runner`
+- no tokens may be taken from the deck at the end of the transaction without the explicit consent of the `runner`
+- `runner` slot is overwritten only:
+  - on `StorageMod.write` call with slot `0x01`
+  - to the desginated `receiver` on `FlatlineMod.contingency` call after the `interval` has passed since `lastUpdate`
+  - on `TwoStepTransition.acceptRunnerTransition` call by the `newRunner`
+
+Assumptions:
+
+- `runner` will not set a malicious mod
+- `runner` is aware of all storage slots passed to `StorageMod.write`
+- `runner` is aware of all storage slots and indices in each mod
+- `runner` will not call `FlashMod.setFlashFeeFactor` with a malicious token
 
 ### Mods
 
