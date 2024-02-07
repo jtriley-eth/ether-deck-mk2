@@ -237,8 +237,14 @@ The `ModRegistered` event is logged on when [`register`](#register) is called.
 Invariants:
 
 - no slots collide except when `StorageMod.write` is used
-- no slot may be written without the explicit consent of the `runner`
-- no tokens may be taken from the deck at the end of the transaction without the explicit consent of the `runner`
+- no slot may be written without the explicit consent of the `runner`; consent meaning:
+  - transaction initiation
+  - signature
+  - approval
+- no tokens may be taken from the deck at the end of the transaction without the explicit consent of the `runner`; consent meaning:
+  - transaction initiation
+  - signature
+  - approval
 - `runner` slot is overwritten only:
   - on `StorageMod.write` call with slot `0x01`
   - to the desginated `receiver` on `FlatlineMod.contingency` call after the `interval` has passed since `lastUpdate`
