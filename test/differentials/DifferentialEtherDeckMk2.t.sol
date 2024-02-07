@@ -6,6 +6,7 @@ import { Test } from "../../lib/forge-std/src/Test.sol";
 import { EtherDeckMk2 } from "../../src/EtherDeckMk2.sol";
 import { DifferentialEtherDeckMk2 } from "./implementations/DifferentialEtherDeckMk2.sol";
 import { MockTarget } from "../mock/MockTarget.sol";
+import { MockMod } from "../mock/MockMod.sol";
 
 contract DifferentialEtherDeckMk2Test is Test {
     EtherDeckMk2 internal fastDeck;
@@ -173,27 +174,43 @@ contract DifferentialEtherDeckMk2Test is Test {
     }
 
     function testFuzzDiffDispatch(
-        bool runnerIsActor,
         address runner,
-        address actor,
         bytes4 selector,
-        address target
+        bytes32 salt,
+        bool throws,
+        bool shouldSet
     ) public {
-        runner = runnerIsActor ? actor : runner;
-        target = boundAddy(target);
+        assumeFallback(selector);
+        address mod = address(new MockMod{ salt: salt }());
+
         setRunner(runner);
 
         vm.startPrank(runner);
 
-        fastDeck.setDispatch(selector, target);
-        slowDeck.setDispatch(selector, target);
+        fastDeck.setDispatch(MockMod.setThrows.selector, mod);
+        slowDeck.setDispatch(MockMod.setThrows.selector, mod);
+        MockMod(payable(fastDeck)).setThrows(throws);
+        MockMod(payable(slowDeck)).setThrows(throws);
+        fastDeck.setDispatch(MockMod.setThrows.selector, address(0));
+        slowDeck.setDispatch(MockMod.setThrows.selector, address(0));
+
+        if (shouldSet) {
+            fastDeck.setDispatch(selector, mod);
+            slowDeck.setDispatch(selector, mod);
+        }
+
         vm.stopPrank();
 
-        (bool fastSucc, bytes memory fastret) = address(fastDeck).call(abi.encodeWithSelector(selector));
-        (bool slowSucc, bytes memory slowret) = address(slowDeck).call(abi.encodeWithSelector(selector));
+        (bool fastSucc, ) = address(fastDeck).call(abi.encodeWithSelector(selector));
+        (bool slowSucc, ) = address(slowDeck).call(abi.encodeWithSelector(selector));
 
-        assertEq(fastSucc, slowSucc);
-        assertEq(keccak256(fastret), keccak256(slowret));
+        if (shouldSet && !throws) {
+            assertEq(fastSucc, true);
+            assertEq(slowSucc, true);
+        } else {
+            assertEq(fastSucc, false);
+            assertEq(slowSucc, false);
+        }
     }
 
     function setRunner(address runner) internal {
@@ -208,5 +225,25 @@ contract DifferentialEtherDeckMk2Test is Test {
                 || addy == 0x4e59b44847b379578588920cA78FbF26c0B4956C
         ) addy = address(uint160(addy) + 256);
         return addy;
+    }
+
+    function assumeFallback(bytes4 selector) internal pure {
+        bytes4[6] memory selectors = [
+            MockMod.runMod.selector,
+            MockMod.setThrows.selector,
+            EtherDeckMk2.run.selector,
+            EtherDeckMk2.runBatch.selector,
+            EtherDeckMk2.setDispatch.selector,
+            EtherDeckMk2.setDispatchBatch.selector
+        ];
+
+        bool selectorMatches;
+        for (uint256 i; i < selectors.length; i++) {
+            if (selector == selectors[i]) {
+                selectorMatches = true;
+            }
+        }
+
+        vm.assume(!selectorMatches);
     }
 }

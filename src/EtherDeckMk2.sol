@@ -169,8 +169,6 @@ contract EtherDeckMk2 {
 
             let selectorsEnd := add(selectors.offset, mul(selectors.length, 0x20))
 
-            success := and(success, eq(selectors.length, targets.length))
-
             for { } 1 { } {
                 if eq(selectorPtr, selectorsEnd) { break }
 
@@ -209,11 +207,11 @@ contract EtherDeckMk2 {
 
             let target := sload(keccak256(0x00, 0x40))
 
-            if iszero(target) { return(0x00, 0x20) }
+            let success := iszero(iszero(target))
 
             calldatacopy(0x00, 0x00, calldatasize())
 
-            let success := delegatecall(gas(), target, 0x00, calldatasize(), 0x00, 0x00)
+            success := and(success, delegatecall(gas(), target, 0x00, calldatasize(), 0x00, 0x00))
 
             returndatacopy(0x00, 0x00, returndatasize())
 

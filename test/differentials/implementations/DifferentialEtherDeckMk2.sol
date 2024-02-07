@@ -52,16 +52,9 @@ contract DifferentialEtherDeckMk2 {
     }
 
     fallback() external payable {
-        bytes4 selector = msg.sig;
+        address mod = dispatch[msg.sig];
 
-        address mod = dispatch[selector];
-
-        if (mod == address(0)) {
-            assembly {
-                mstore(0x00, selector)
-                return(0x00, 0x20)
-            }
-        }
+        require(mod != address(0));
 
         (bool success, bytes memory retdata) = mod.delegatecall(msg.data);
 

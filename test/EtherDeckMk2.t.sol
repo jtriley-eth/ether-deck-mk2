@@ -246,6 +246,12 @@ contract EtherDeckMk2Test is Test {
         MockMod(payable(deck)).runMod();
     }
 
+    function testDispatchNotSet() public asPaidActor(alice, 0) {
+        vm.expectRevert();
+
+        MockMod(payable(deck)).runMod();
+    }
+
     function testDispatchReverts() public asPaidActor(alice, 0) {
         deck.setDispatch(MockMod.setThrows.selector, mockMod);
 
@@ -259,11 +265,9 @@ contract EtherDeckMk2Test is Test {
     }
 
     function testEmptyDispatch() public {
-        (bool succ, bytes memory retdata) = address(deck).call(abi.encode(defaultSelector));
-        (bytes4 expected) = abi.decode(retdata, (bytes4));
+        (bool succ,) = address(deck).call(abi.encode(defaultSelector));
 
-        assertEq(expected, defaultSelector);
-        assertTrue(succ);
+        assertFalse(succ);
     }
 
     function testFuzzRun(
@@ -401,7 +405,7 @@ contract EtherDeckMk2Test is Test {
         bytes32 salt,
         bool throws
     ) public asPaidActor(alice, 0) {
-        vm.assume(selector != MockMod.setThrows.selector && selector != MockMod.runMod.selector);
+        assumeFallback(selector);
 
         address mod = address(new MockMod{ salt: salt }());
 
@@ -419,15 +423,32 @@ contract EtherDeckMk2Test is Test {
             }
         }
 
-        (bool succ, bytes memory retdata) = address(deck).call(payload);
+        (bool succ, ) = address(deck).call(payload);
 
         if (shouldSet && !throws) {
             assertTrue(succ);
-        } else if (shouldSet && throws) {
-            assertFalse(succ);
         } else {
-            (bytes4 expected) = abi.decode(retdata, (bytes4));
-            assertEq(expected, selector);
+            assertFalse(succ);
         }
+    }
+
+    function assumeFallback(bytes4 selector) internal pure {
+        bytes4[6] memory selectors = [
+            MockMod.runMod.selector,
+            MockMod.setThrows.selector,
+            EtherDeckMk2.run.selector,
+            EtherDeckMk2.runBatch.selector,
+            EtherDeckMk2.setDispatch.selector,
+            EtherDeckMk2.setDispatchBatch.selector
+        ];
+
+        bool selectorMatches;
+        for (uint256 i; i < selectors.length; i++) {
+            if (selector == selectors[i]) {
+                selectorMatches = true;
+            }
+        }
+
+        vm.assume(!selectorMatches);
     }
 }
