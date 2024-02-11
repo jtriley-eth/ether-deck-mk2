@@ -3,15 +3,15 @@ pragma solidity 0.8.24;
 
 import { Test } from "../lib/forge-std/src/Test.sol";
 
-import { MassTransferMod } from "../src/mods/MassTransferMod.sol";
+import { TransferMod } from "../src/mods/TransferMod.sol";
 
 import { MockERC20 } from "./mock/MockERC20.sol";
 import { MockERC721 } from "./mock/MockERC721.sol";
 import { MockERC1155 } from "./mock/MockERC1155.sol";
 import { MockERC6909 } from "./mock/MockERC6909.sol";
 
-contract MassTransferModTest is Test {
-    MassTransferMod internal transferMod;
+contract TransferModTest is Test {
+    TransferMod internal transferMod;
     MockERC20 internal erc20;
     MockERC721 internal erc721;
     MockERC1155 internal erc1155;
@@ -24,7 +24,7 @@ contract MassTransferModTest is Test {
     uint256 internal defaultId = 2;
 
     function setUp() public {
-        transferMod = new MassTransferMod();
+        transferMod = new TransferMod();
         erc20 = new MockERC20();
         erc721 = new MockERC721();
         erc1155 = new MockERC1155();

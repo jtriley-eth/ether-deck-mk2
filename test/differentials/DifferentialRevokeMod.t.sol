@@ -3,21 +3,21 @@ pragma solidity 0.8.24;
 
 import { Test } from "../../lib/forge-std/src/Test.sol";
 
-import { MassRevokeMod } from "../../src/mods/MassRevokeMod.sol";
-import { DifferentialMassRevokeMod } from "./implementations/DifferentialMassRevokeMod.sol";
+import { RevokeMod } from "../../src/mods/RevokeMod.sol";
+import { DifferentialRevokeMod } from "./implementations/DifferentialRevokeMod.sol";
 
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { MockERC721 } from "../mock/MockERC721.sol";
 import { MockERC1155 } from "../mock/MockERC1155.sol";
 import { MockERC6909 } from "../mock/MockERC6909.sol";
 
-contract DifferentialMassRevokeModTest is Test {
-    MassRevokeMod internal fastRevokeMod;
-    DifferentialMassRevokeMod internal slowRevokeMod;
+contract DifferentialRevokeModTest is Test {
+    RevokeMod internal fastRevokeMod;
+    DifferentialRevokeMod internal slowRevokeMod;
 
     function setUp() public {
-        fastRevokeMod = new MassRevokeMod();
-        slowRevokeMod = new DifferentialMassRevokeMod();
+        fastRevokeMod = new RevokeMod();
+        slowRevokeMod = new DifferentialRevokeMod();
     }
 
     function testFuzzDiffRevokeERC20Approval(

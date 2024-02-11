@@ -3,21 +3,21 @@ pragma solidity 0.8.24;
 
 import { Test } from "../../lib/forge-std/src/Test.sol";
 
-import { MassTransferMod } from "../../src/mods/MassTransferMod.sol";
-import { DifferentialMassTransferMod } from "./implementations/DifferentialMassTransferMod.sol";
+import { TransferMod } from "../../src/mods/TransferMod.sol";
+import { DifferentialTransferMod } from "./implementations/DifferentialTransferMod.sol";
 
 import { MockERC20 } from "../mock/MockERC20.sol";
 import { MockERC721 } from "../mock/MockERC721.sol";
 import { MockERC1155 } from "../mock/MockERC1155.sol";
 import { MockERC6909 } from "../mock/MockERC6909.sol";
 
-contract DifferentialMassTransferModTest is Test {
-    MassTransferMod internal fastTransferMod;
-    DifferentialMassTransferMod internal slowTransferMod;
+contract DifferentialTransferModTest is Test {
+    TransferMod internal fastTransferMod;
+    DifferentialTransferMod internal slowTransferMod;
 
     function setUp() public {
-        fastTransferMod = new MassTransferMod();
-        slowTransferMod = new DifferentialMassTransferMod();
+        fastTransferMod = new TransferMod();
+        slowTransferMod = new DifferentialTransferMod();
     }
 
     function testFuzzDiffTransferERC20(

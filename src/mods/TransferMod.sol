@@ -5,7 +5,7 @@ pragma solidity 0.8.24;
 /// @author jtriley.eth
 /// @notice a reasonably optimized transfer mod for Ether Deck Mk2
 /// @dev supports erc-20, erc-721, erc-1155, and erc-6909
-contract MassTransferMod {
+contract TransferMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
 

@@ -6,7 +6,7 @@ import { MockERC721 } from "../../mock/MockERC721.sol";
 import { MockERC1155 } from "../../mock/MockERC1155.sol";
 import { MockERC6909 } from "../../mock/MockERC6909.sol";
 
-contract DifferentialMassTransferMod {
+contract DifferentialTransferMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
 
