@@ -20,6 +20,51 @@ contract DifferentialTransferModTest is Test {
         slowTransferMod = new DifferentialTransferMod();
     }
 
+    function testFuzzDiffTransferEther(
+        bool runnerIsActor,
+        address runner,
+        address actor,
+        bytes32 salt,
+        uint256[] memory amounts,
+        bool lengthMismatch
+    ) public {
+        runner = runnerIsActor ? actor : runner;
+
+        setRunner(runner);
+
+        address[] memory receivers = new address[](lengthMismatch ? amounts.length + 1 : amounts.length);
+
+        uint256 totalValue;
+
+        for (uint256 i; i < amounts.length; i++) {
+            amounts[i] = bound(amounts[i], 0, type(uint96).max);
+            totalValue += amounts[i];
+            salt = keccak256(abi.encode(salt));
+            receivers[i] = address(bytes20(salt));
+        }
+
+        vm.deal(actor, totalValue * 2);
+
+        vm.startPrank(actor);
+
+        if (runner != actor || lengthMismatch) {
+            vm.expectRevert();
+            fastTransferMod.transferEther{ value: totalValue }(receivers, amounts);
+
+            vm.expectRevert();
+            slowTransferMod.transferEther{ value: totalValue }(receivers, amounts);
+        } else {
+            fastTransferMod.transferEther{ value: totalValue }(receivers, amounts);
+            slowTransferMod.transferEther{ value: totalValue }(receivers, amounts);
+
+            for (uint256 i; i < amounts.length; i++) {
+                assertEq(address(receivers[i]).balance, amounts[i] * 2);
+            }
+        }
+
+        vm.stopPrank();
+    }
+
     function testFuzzDiffTransferERC20(
         bool runnerIsActor,
         address runner,

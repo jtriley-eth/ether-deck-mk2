@@ -9,6 +9,39 @@ contract TransferMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
 
+    /// @notice transfers ether
+    function transferEther(address[] calldata receivers, uint256[] calldata amounts) external payable {
+        assembly {
+            let success := eq(caller(), sload(runner.slot))
+
+            let receiverOffset := receivers.offset
+
+            let amountOffset := amounts.offset
+
+            let receiversEnd := add(receiverOffset, mul(receivers.length, 0x20))
+
+            success := and(success, eq(receivers.length, amounts.length))
+
+            for { } 1 { } {
+                if eq(receiverOffset, receiversEnd) { break }
+
+                let receiver := calldataload(receiverOffset)
+
+                let amount := calldataload(amountOffset)
+
+                success := and(success, call(gas(), receiver, amount, 0x00, 0x00, 0x00, 0x00))
+
+                receiverOffset := add(receiverOffset, 0x20)
+
+                amountOffset := add(amountOffset, 0x20)
+            }
+
+            if success { return(0x00, 0x00) }
+
+            revert(0x00, 0x00)
+        }
+    }
+
     /// @notice transfers erc-20 tokens
     /// @dev directives:
     ///      01. check if caller is runner; cache as success

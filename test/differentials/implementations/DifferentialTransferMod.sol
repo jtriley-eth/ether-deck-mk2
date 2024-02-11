@@ -10,6 +10,16 @@ contract DifferentialTransferMod {
     mapping(bytes4 => address) internal dispatch;
     address internal runner;
 
+    function transferEther(address[] calldata receivers, uint256[] calldata amounts) external payable {
+        require(msg.sender == runner);
+        require(receivers.length == amounts.length);
+
+        for (uint256 i; i < receivers.length; i++) {
+            (bool succ, ) = receivers[i].call{ value: amounts[i] }(new bytes(0));
+            require(succ);
+        }
+    }
+
     function transferERC20(
         address[] calldata tokens,
         address[] calldata receivers,

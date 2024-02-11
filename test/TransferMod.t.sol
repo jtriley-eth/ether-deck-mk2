@@ -31,6 +31,75 @@ contract TransferModTest is Test {
         erc6909 = new MockERC6909();
     }
 
+    function testTransferEtherSingle() public {
+        setRunner(alice);
+
+        vm.deal(alice, defaultAmount);
+
+        address[] memory receivers = new address[](1);
+        receivers[0] = bob;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = defaultAmount;
+
+        vm.expectCall(bob, defaultAmount, new bytes(0));
+
+        vm.prank(alice);
+        transferMod.transferEther{ value: defaultAmount }(receivers, amounts);
+
+        assertEq(alice.balance, 0);
+        assertEq(bob.balance, defaultAmount);
+    }
+
+    function testTransferEtherDouble() public {
+        setRunner(alice);
+
+        vm.deal(alice, defaultAmount * 2);
+
+        address[] memory receivers = new address[](2);
+        receivers[0] = bob;
+        receivers[1] = charlie;
+
+        uint256[] memory amounts = new uint256[](2);
+        amounts[0] = defaultAmount;
+        amounts[1] = defaultAmount;
+
+        vm.expectCall(bob, defaultAmount, new bytes(0));
+        vm.expectCall(charlie, defaultAmount, new bytes(0));
+
+        vm.prank(alice);
+        transferMod.transferEther{ value: defaultAmount * 2 }(receivers, amounts);
+
+        assertEq(alice.balance, 0);
+        assertEq(bob.balance, defaultAmount);
+        assertEq(charlie.balance, defaultAmount);
+    }
+
+    function testTransferEtherEmpty() public {
+        setRunner(alice);
+
+        vm.prank(alice);
+        transferMod.transferEther(new address[](0), new uint256[](0));
+    }
+
+    function testTransferEtherNotRunner() public {
+        setRunner(alice);
+
+        vm.expectRevert();
+
+        vm.prank(bob);
+        transferMod.transferEther(new address[](0), new uint256[](0));
+    }
+
+    function testTransferEtherMismatchLength() public {
+        setRunner(alice);
+
+        vm.expectRevert();
+
+        vm.prank(alice);
+        transferMod.transferEther(new address[](0), new uint256[](1));
+    }
+
     function testTransferERC20Single() public {
         setRunner(alice);
 
@@ -399,6 +468,46 @@ contract TransferModTest is Test {
 
         vm.prank(alice);
         transferMod.transferERC6909(new address[](1), new address[](2), new uint256[](2), new uint256[](2));
+    }
+
+    function testFuzzTransferEther(
+        bool runnerIsActor,
+        address runner,
+        address actor,
+        bytes32 salt,
+        uint256[] memory amounts,
+        bool lengthMismatch
+    ) public {
+        runner = runnerIsActor ? actor : runner;
+
+        setRunner(runner);
+
+        address[] memory receivers = new address[](lengthMismatch ? amounts.length + 1 : amounts.length);
+
+        uint256 totalValue;
+
+        for (uint256 i; i < amounts.length; i++) {
+            amounts[i] = bound(amounts[i], 0, type(uint96).max);
+            totalValue += amounts[i];
+
+            salt = keccak256(abi.encode(salt));
+            receivers[i] = address(bytes20(salt));
+        }
+
+        if (runner != actor || lengthMismatch) {
+            vm.expectRevert();
+        }
+
+        vm.deal(actor, totalValue);
+
+        vm.prank(actor);
+        transferMod.transferEther{ value: totalValue }(receivers, amounts);
+
+        if (runner == actor && !lengthMismatch) {
+            for (uint256 i; i < amounts.length; i++) {
+                assertEq(receivers[i].balance, amounts[i]);
+            }
+        }
     }
 
     function testFuzzTransferERC20(
