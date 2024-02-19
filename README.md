@@ -143,6 +143,13 @@ The `DispatchSet` event is logged when [`setDispatch`](#setdispatch) is called.
 
 ## DeckRegistry
 
+```mermaid
+flowchart LR
+    dr{DeckRegistry}
+    dr --> deployer
+    dr --> deploy
+```
+
 The [`DeckRegistry`](src/DeckRegistry.sol) creates and registers decks. Only existing decks may create decks through the
 deck registry.
 
@@ -193,6 +200,17 @@ must be taken before setting mods to the deck.
 - [`TwoStepTransitionMod`](src/mods/TwoStepTransitionMod.sol): A mod for two-step runner transitions.
 
 ## Mod Registry
+
+```mermaid
+flowchart LR
+    mr{ModRegistry}
+
+    mr --> authority
+    mr --> searchByName
+    mr --> searchByAddress
+    mr --> transferAuthority
+    mr --> register
+```
 
 The [`ModRegistry`](src/ModRegistry.sol) stores mods with name and address lookups.
 
