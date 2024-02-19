@@ -18,9 +18,9 @@ contract EtherDeckMk2 {
     /// @notice runner of calls
     address public runner;
 
-    constructor() {
+    constructor(address firstRunner) {
         assembly {
-            sstore(runner.slot, caller())
+            sstore(runner.slot, firstRunner)
         }
     }
 

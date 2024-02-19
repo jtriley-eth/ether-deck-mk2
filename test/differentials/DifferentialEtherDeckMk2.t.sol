@@ -13,8 +13,8 @@ contract DifferentialEtherDeckMk2Test is Test {
     DifferentialEtherDeckMk2 internal slowDeck;
 
     function setUp() public {
-        fastDeck = new EtherDeckMk2();
-        slowDeck = new DifferentialEtherDeckMk2();
+        fastDeck = new EtherDeckMk2(address(0));
+        slowDeck = new DifferentialEtherDeckMk2(address(0));
     }
 
     function testFuzzDiffRun(

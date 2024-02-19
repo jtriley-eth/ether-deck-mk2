@@ -25,7 +25,7 @@ contract EtherDeckMk2Test is Test {
     }
 
     function setUp() public {
-        deck = new EtherDeckMk2();
+        deck = new EtherDeckMk2(address(0));
         mockTarget = address(new MockTarget());
         mockMod = address(new MockMod());
     }

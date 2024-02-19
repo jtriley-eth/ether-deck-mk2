@@ -7,6 +7,10 @@ contract DifferentialEtherDeckMk2 {
     mapping(bytes4 => address) public dispatch;
     address public runner;
 
+    constructor(address firstRunner) {
+        runner = firstRunner;
+    }
+
     function run(address target, bytes calldata payload) external payable {
         require(runner == msg.sender);
         (bool success, bytes memory returndata) = target.call{ value: msg.value }(payload);
