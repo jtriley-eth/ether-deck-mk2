@@ -141,6 +141,39 @@ event DispatchSet(bytes4 indexed selector, address indexed target);
 
 The `DispatchSet` event is logged when [`setDispatch`](#setdispatch) is called.
 
+## DeckRegistry
+
+The [`DeckRegistry`](src/DeckRegistry.sol) creates and registers decks. Only existing decks may create decks through the
+deck registry.
+
+### ABI
+
+#### `deployer`
+
+```solidity
+mapping(address => address) public deployer;
+```
+
+The `deployer` function loads the deployer address for a given deck.
+
+#### `deploy`
+
+```solidity
+function deploy(address runner) external returns (address);
+```
+
+The `deploy` function deploys a new deck from another deck.
+
+### Events
+
+#### `Registered`
+
+```solidity
+event Registered(address indexed deployer, address indexed deck)
+```
+
+The `Registered` event is logged when [`deploy`](#deploy) is called.
+
 ## Mods
 
 Mods are contracts that may be delegate called by the deck to extend its functionality. Any contract
@@ -161,7 +194,7 @@ must be taken before setting mods to the deck.
 
 ## Mod Registry
 
-The mod registry stores mods with name and address lookups.
+The [`ModRegistry`](src/ModRegistry.sol) stores mods with name and address lookups.
 
 ### ABI
 
