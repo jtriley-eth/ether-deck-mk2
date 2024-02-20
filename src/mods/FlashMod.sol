@@ -17,7 +17,7 @@ contract FlashMod {
     ///      02. store token in memory
     ///      03. store flash fee slot index in memory
     ///      04. store the flash fee factor in storage at the slot hash
-    /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashFeeSlotIndex") - 1`
+    /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashMod.flashFeeFactor") - 1`
     /// @param token the token to flash
     /// @param factor the flash fee factor in `1 / 10_000`
     function setFlashFeeFactor(address token, uint256 factor) external {
@@ -26,7 +26,7 @@ contract FlashMod {
 
             mstore(0x00, token)
 
-            mstore(0x20, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
+            mstore(0x20, 0xb03bc4f1379300f4f940d278a38ba81c82232501ae1614184a0ce60133d2e677)
 
             sstore(keccak256(0x00, 0x40), factor)
         }
@@ -47,7 +47,7 @@ contract FlashMod {
         assembly {
             mstore(0x00, token)
 
-            mstore(0x20, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
+            mstore(0x20, 0xb03bc4f1379300f4f940d278a38ba81c82232501ae1614184a0ce60133d2e677)
 
             let success := iszero(iszero(sload(keccak256(0x00, 0x40))))
 
@@ -72,14 +72,14 @@ contract FlashMod {
     ///      05. if fee is zero or fee multiplication step overflows, revert
     ///      06. finish fee computation, store in memory
     ///      07. return flash fee
-    /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashFeeSlotIndex") - 1`
+    /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashMod.flashFeeFactor") - 1`
     /// @param token the token to flash
     /// @param amount the amount for which to compute the flash fee
     function flashFee(address token, uint256 amount) external view returns (uint256) {
         assembly {
             mstore(0x00, token)
 
-            mstore(0x20, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
+            mstore(0x20, 0xb03bc4f1379300f4f940d278a38ba81c82232501ae1614184a0ce60133d2e677)
 
             let factor := sload(keccak256(0x00, 0x40))
 
@@ -130,7 +130,7 @@ contract FlashMod {
     ///      29. store one (true) in memory
     ///      30. if success, return true
     ///      31. else, revert
-    /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashFeeSlotIndex") - 1`
+    /// @dev flash fee slot index is defined as `keccak256("EtherDeckMk2.FlashMod.flashFeeFactor") - 1`
     /// @dev onFlashLoan return value is defined as `keccak256("ERC3156FlashBorrower.onFlashLoan")`
     /// @param receiver the receiver of the flash
     /// @param token the token to flash
@@ -155,7 +155,7 @@ contract FlashMod {
 
             mstore(0x24, token)
 
-            mstore(0x44, 0xf1eb8105a4a1127cc7c1f140012e33366c72dd5143314d8de5d93f0cd7b10318)
+            mstore(0x44, 0xb03bc4f1379300f4f940d278a38ba81c82232501ae1614184a0ce60133d2e677)
 
             let factor := sload(keccak256(0x24, 0x40))
 

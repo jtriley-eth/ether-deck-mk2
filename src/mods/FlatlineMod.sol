@@ -13,7 +13,7 @@ contract FlatlineMod {
     ///      01. check if caller is runner; revert if not
     ///      02. bitpack receiver, interval, and current timestamp into value
     ///      03. store value in flatline slot
-    /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.FlatlineSlot") - 1`
+    /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.Flatline.contingency") - 1`
     /// @dev flatline value is defined as `receiver_u160 . interval_u32 . lastUpdate_u64`
     /// @dev setting the interval to zero will disable the contingency
     /// @param receiver the address to receive the contingency
@@ -24,7 +24,7 @@ contract FlatlineMod {
 
             let value := or(timestamp(), or(shl(0x40, interval), shl(0x60, receiver)))
 
-            sstore(0x2baf74cad7040289b2b1fedcfd3140834838fbbf2e2d05fd8eb72bdb1660b9d0, value)
+            sstore(0x08c143f31a8b0ea787fb1fb8e637c8434eafb594d63cf7d1b812d10091c0603c, value)
         }
     }
 
@@ -34,17 +34,17 @@ contract FlatlineMod {
     ///      02. load value from flatline slot; cache as value
     ///      03. mask lastUpdate from value, set to current timestamp; cache as value
     ///      04. store value in flatline slot
-    /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.FlatlineSlot") - 1`
+    /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.Flatline.contingency") - 1`
     /// @dev flatline value is defined as `receiver_u160 . interval_u32 . lastUpdate_u64`
     function checkIn() external {
         assembly {
             if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
-            let value := sload(0x2baf74cad7040289b2b1fedcfd3140834838fbbf2e2d05fd8eb72bdb1660b9d0)
+            let value := sload(0x08c143f31a8b0ea787fb1fb8e637c8434eafb594d63cf7d1b812d10091c0603c)
 
             value := or(and(value, not(0xffffffffffffffff)), timestamp())
 
-            sstore(0x2baf74cad7040289b2b1fedcfd3140834838fbbf2e2d05fd8eb72bdb1660b9d0, value)
+            sstore(0x08c143f31a8b0ea787fb1fb8e637c8434eafb594d63cf7d1b812d10091c0603c, value)
         }
     }
 
@@ -56,11 +56,11 @@ contract FlatlineMod {
     ///      04. check if an interval has passed since last update and that interval is nonzero; revert if not
     ///      05. store receiver to runner slot
     ///      05. clear flatline slot
-    /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.FlatlineSlot") - 1`
+    /// @dev flatline slot is defined as `keccak256("EtherDeckMk2.Flatline.contingency") - 1`
     /// @dev flatline value is defined as `receiver_u160 . interval_u32 . lastUpdate_u64`
     function contingency() external {
         assembly {
-            let value := sload(0x2baf74cad7040289b2b1fedcfd3140834838fbbf2e2d05fd8eb72bdb1660b9d0)
+            let value := sload(0x08c143f31a8b0ea787fb1fb8e637c8434eafb594d63cf7d1b812d10091c0603c)
 
             let lastUpdate := and(value, 0xffffffffffffffff)
 
@@ -70,7 +70,7 @@ contract FlatlineMod {
 
             sstore(runner.slot, shr(0x60, value))
 
-            sstore(0x2baf74cad7040289b2b1fedcfd3140834838fbbf2e2d05fd8eb72bdb1660b9d0, 0x00)
+            sstore(0x08c143f31a8b0ea787fb1fb8e637c8434eafb594d63cf7d1b812d10091c0603c, 0x00)
         }
     }
 }

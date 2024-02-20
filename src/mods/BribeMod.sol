@@ -12,11 +12,11 @@ contract BribeMod {
     /// @dev directives:
     ///      01. move nonce from storage to memory
     ///      02. return nonce
-    /// @dev the nonce slot is defined as `keccak256("EtherDeckMk2.Nonce") - 1`
+    /// @dev the nonce slot is defined as `keccak256("EtherDeckMk2.BribeMod.nonce") - 1`
     /// @return nonce the nonce of the runner
     function nonce() external view returns (uint256) {
         assembly {
-            mstore(0x00, sload(0x51448ae5f8e845d125c02858a227e28c25f218a7e0050dff756ebd4ae4439c98))
+            mstore(0x00, sload(0x35cc143ea48486ca62296c4e48389c5f5abbd342fc1b39ad2da3d145f4b0d6bb))
 
             return(0x00, 0x20)
         }
@@ -70,7 +70,7 @@ contract BribeMod {
     ///      15. if success, return with returndata
     ///      16. else, revert with revertdata
     /// @dev sighash is `keccak256(abi.encode(payload, target, callvalue, bribe, nonce))`
-    /// @dev the nonce slot is defined as `keccak256("EtherDeckMk2.Nonce") - 1`
+    /// @dev the nonce slot is defined as `keccak256("EtherDeckMk2.BribeMod.nonce") - 1`
     /// @param target the call target address
     /// @param payload the call payload
     /// @param sigdata the ecrecover signature data
@@ -95,13 +95,13 @@ contract BribeMod {
 
             mstore(add(0x40, payload.length), bribe)
 
-            let nonce := sload(0x51448ae5f8e845d125c02858a227e28c25f218a7e0050dff756ebd4ae4439c98)
+            let nonce := sload(0x35cc143ea48486ca62296c4e48389c5f5abbd342fc1b39ad2da3d145f4b0d6bb)
 
             mstore(add(0x60, payload.length), nonce)
 
             success := and(success, eq(keccak256(0x00, add(0x80, payload.length)), calldataload(sigdata.offset)))
 
-            sstore(0x51448ae5f8e845d125c02858a227e28c25f218a7e0050dff756ebd4ae4439c98, add(nonce, 0x01))
+            sstore(0x35cc143ea48486ca62296c4e48389c5f5abbd342fc1b39ad2da3d145f4b0d6bb, add(nonce, 0x01))
 
             success := and(success, call(gas(), caller(), bribe, 0x00, 0x00, 0x00, 0x00))
 

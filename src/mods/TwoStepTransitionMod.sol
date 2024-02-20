@@ -12,12 +12,12 @@ contract TwoStepTransitionMod {
     /// @dev directives:
     ///      01. if caller is not runner, revert
     ///      02. store newRunner in newRunner slot
-    /// @dev newRunner slot is defined as `keccak256("EtherDeckMk2.NewRunner") - 1`
+    /// @dev newRunner slot is defined as `keccak256("EtherDeckMk2.TwoStepTransitionMod.newRunner") - 1`
     function startRunnerTransition(address newRunner) external {
         assembly {
             if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
-            sstore(0x91575d7bad3e5965f801b4ac5f4d48ffddfc86e1a6f2ba31dc5a35148e00e041, newRunner)
+            sstore(0x1135fd56f406be55915358ca5fba26244b149720a5a3d009d6554ab509882baa, newRunner)
         }
     }
 
@@ -28,7 +28,7 @@ contract TwoStepTransitionMod {
     ///      03. store newRunner in runner slot
     function acceptRunnerTransition() external {
         assembly {
-            let newRunner := sload(0x91575d7bad3e5965f801b4ac5f4d48ffddfc86e1a6f2ba31dc5a35148e00e041)
+            let newRunner := sload(0x1135fd56f406be55915358ca5fba26244b149720a5a3d009d6554ab509882baa)
 
             if iszero(eq(newRunner, caller())) { revert(0x00, 0x00) }
 
