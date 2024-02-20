@@ -7,7 +7,7 @@ contract DifferentialEtherDeckMk2 {
     mapping(bytes4 => address) public dispatch;
     address public runner;
 
-    constructor(address firstRunner) {
+    constructor(address firstRunner) payable {
         runner = firstRunner;
     }
 

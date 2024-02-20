@@ -18,7 +18,7 @@ contract EtherDeckMk2 {
     /// @notice runner of calls
     address public runner;
 
-    constructor(address firstRunner) {
+    constructor(address firstRunner) payable {
         assembly {
             sstore(runner.slot, firstRunner)
         }
@@ -129,7 +129,7 @@ contract EtherDeckMk2 {
     /// @dev the address set by this has full write access over the ether deck
     /// @param selector the selector to dispatch from
     /// @param target the target address to dispatch to
-    function setDispatch(bytes4 selector, address target) external {
+    function setDispatch(bytes4 selector, address target) external payable {
         assembly {
             if iszero(eq(caller(), sload(runner.slot))) { revert(0x00, 0x00) }
 
@@ -157,7 +157,7 @@ contract EtherDeckMk2 {
     ///          f. log dispatch set
     ///          g. increment selector offset
     ///          h. increment target offset
-    function setDispatchBatch(bytes4[] calldata selectors, address[] calldata targets) external {
+    function setDispatchBatch(bytes4[] calldata selectors, address[] calldata targets) external payable {
         assembly {
             let success := eq(caller(), sload(runner.slot))
 
