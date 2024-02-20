@@ -1,6 +1,8 @@
 [profile.default]
 evm_version = "shanghai"
 via_ir = true
+optimizer_runs = 1
+bytecode_hash = "none"
 
 [fuzz]
 runs = 256
