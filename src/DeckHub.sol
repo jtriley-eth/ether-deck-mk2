@@ -12,17 +12,13 @@ contract DeckHub {
 
     /// @notice deploys deck
     /// @dev directives:
-    ///      01. store caller in memory
-    ///      02. load caller's deployer from storage, check if nonzero; cache as success
-    ///      03. store initcode in memory (lines 38:73)
-    ///      04. store runner in memory at the end of initcode, padded to 32 bytes
-    ///      05. deploy deck with create2; cache as deck
-    ///      06. check if deck is nonzero; compose success
-    ///      07. store deck in memory
-    ///      08. store caller at `deployer[deck]` in storage
-    ///      09. log deck registration
-    ///      10. if success, return deck
-    ///      11. else, revert
+    ///      01. store initcode in memory (lines 21:54)
+    ///      02. store runner in memory
+    ///      03. create2 deck with provided salt; cache as deck
+    ///      04. if deck is zero, revert
+    ///      05. log deck deployment
+    ///      06. store deck in memory
+    ///      07. return deck
     /// @dev only decks deployed by this factory may deploy and register other decks
     /// @param runner the new deck's runner
     /// @return deck the new deck
