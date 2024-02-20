@@ -206,6 +206,6 @@ contract FlashModTest is Test {
     }
 
     function flashFeeFactorSlot(MockERC20 _token) internal pure returns (bytes32) {
-        return keccak256(abi.encode(_token, uint256(keccak256("EtherDeckMk2.FlashFeeSlotIndex")) - 1));
+        return keccak256(abi.encode(_token, uint256(keccak256("EtherDeckMk2.FlashMod.flashFeeFactor")) - 1));
     }
 }

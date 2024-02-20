@@ -7,14 +7,14 @@ contract DifferentialTwoStepTransitionMod {
 
     function startRunnerTransition(address newRunner) external {
         require(msg.sender == runner);
-        uint256 slot = uint256(keccak256("EtherDeckMk2.NewRunner")) - 1;
+        uint256 slot = uint256(keccak256("EtherDeckMk2.TwoStepTransitionMod.newRunner")) - 1;
         assembly {
             sstore(slot, newRunner)
         }
     }
 
     function acceptRunnerTransition() external {
-        uint256 slot = uint256(keccak256("EtherDeckMk2.NewRunner")) - 1;
+        uint256 slot = uint256(keccak256("EtherDeckMk2.TwoStepTransitionMod.newRunner")) - 1;
         address newRunner;
         assembly {
             newRunner := sload(slot)

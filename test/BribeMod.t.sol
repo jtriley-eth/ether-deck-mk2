@@ -21,7 +21,7 @@ contract BribeModTest is Test {
     function testNonce() public {
         assertEq(bribeMod.nonce(), 0);
 
-        vm.store(address(bribeMod), bytes32(uint256(keccak256("EtherDeckMk2.Nonce")) - 1), bytes32(uint256(1)));
+        vm.store(address(bribeMod), bytes32(uint256(keccak256("EtherDeckMk2.BribeMod.nonce")) - 1), bytes32(uint256(1)));
 
         assertEq(bribeMod.nonce(), 1);
     }
@@ -167,7 +167,7 @@ contract BribeModTest is Test {
     function testFuzzNonce(uint256 nonce) public {
         assertEq(bribeMod.nonce(), 0);
 
-        vm.store(address(bribeMod), bytes32(uint256(keccak256("EtherDeckMk2.Nonce")) - 1), bytes32(nonce));
+        vm.store(address(bribeMod), bytes32(uint256(keccak256("EtherDeckMk2.BribeMod.nonce")) - 1), bytes32(nonce));
 
         assertEq(bribeMod.nonce(), nonce);
     }

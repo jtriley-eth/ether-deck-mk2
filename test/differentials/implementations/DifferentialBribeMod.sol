@@ -6,7 +6,7 @@ contract DifferentialBribeMod {
     address internal runner;
 
     function nonce() public view returns (uint256 value) {
-        uint256 slot = uint256(keccak256("EtherDeckMk2.Nonce")) - 1;
+        uint256 slot = uint256(keccak256("EtherDeckMk2.BribeMod.nonce")) - 1;
         assembly {
             value := sload(slot)
         }
@@ -38,7 +38,7 @@ contract DifferentialBribeMod {
         require(hash == keccak256(abi.encodePacked(payload, uint256(uint160(target)), msg.value, bribe, sigNonce)));
         require(runner == ecrecover(hash, v, r, s));
 
-        uint256 nonceSlot = uint256(keccak256("EtherDeckMk2.Nonce")) - 1;
+        uint256 nonceSlot = uint256(keccak256("EtherDeckMk2.BribeMod.nonce")) - 1;
         sigNonce += 1;
         assembly {
             sstore(nonceSlot, sigNonce)

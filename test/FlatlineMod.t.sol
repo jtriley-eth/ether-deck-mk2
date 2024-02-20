@@ -10,7 +10,7 @@ contract FlatlineModTest is Test {
     address internal alice = vm.addr(1);
     address internal bob = vm.addr(2);
     uint32 internal defaultInterval = 1;
-    bytes32 internal flatlineSlot = bytes32(uint256(keccak256("EtherDeckMk2.FlatlineSlot")) - 1);
+    bytes32 internal flatlineSlot = bytes32(uint256(keccak256("EtherDeckMk2.Flatline.contingency")) - 1);
 
     function setUp() public {
         flatlineMod = new FlatlineMod();

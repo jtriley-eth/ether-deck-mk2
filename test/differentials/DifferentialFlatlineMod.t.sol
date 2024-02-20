@@ -10,7 +10,7 @@ contract DifferentialFlatlineModTest is Test {
     FlatlineMod internal fastFlatlineMod;
     DifferentialFlatlineMod internal slowFlatlineMod;
 
-    bytes32 internal flatlineSlot = bytes32(uint256(keccak256("EtherDeckMk2.FlatlineSlot")) - 1);
+    bytes32 internal flatlineSlot = bytes32(uint256(keccak256("EtherDeckMk2.Flatline.contingency")) - 1);
 
     function setUp() public {
         fastFlatlineMod = new FlatlineMod();

@@ -11,7 +11,7 @@ contract TwoStepTransitionModTest is Test {
     address internal alice = vm.addr(1);
     address internal bob = vm.addr(2);
 
-    bytes32 internal NewRunnerSlot = bytes32(uint256(keccak256("EtherDeckMk2.NewRunner")) - 1);
+    bytes32 internal NewRunnerSlot = bytes32(uint256(keccak256("EtherDeckMk2.TwoStepTransitionMod.newRunner")) - 1);
 
     function setUp() public {
         twoStepMod = new TwoStepTransitionMod();

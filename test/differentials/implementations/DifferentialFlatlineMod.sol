@@ -52,7 +52,7 @@ contract DifferentialFlatlineMod {
     }
 
     function flatlineSlot() internal pure returns (uint256) {
-        return uint256(keccak256("EtherDeckMk2.FlatlineSlot")) - 1;
+        return uint256(keccak256("EtherDeckMk2.Flatline.contingency")) - 1;
     }
 
     function pack(address receiver, uint32 interval, uint64 timestamp) internal pure returns (uint256) {

@@ -10,7 +10,7 @@ contract DifferentialTwoStepTransitionModTest is Test {
     TwoStepTransitionMod internal fastTwoStepMod;
     DifferentialTwoStepTransitionMod internal slowTwoStepMod;
 
-    bytes32 internal NewRunnerSlot = bytes32(uint256(keccak256("EtherDeckMk2.NewRunner")) - 1);
+    bytes32 internal NewRunnerSlot = bytes32(uint256(keccak256("EtherDeckMk2.TwoStepTransitionMod.newRunner")) - 1);
 
     function setUp() public {
         fastTwoStepMod = new TwoStepTransitionMod();

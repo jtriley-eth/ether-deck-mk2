@@ -22,7 +22,7 @@ contract DifferentialFlashMod {
 
         require(factor <= divisor);
 
-        bytes32 slot = keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashFeeSlotIndex")) - 1));
+        bytes32 slot = keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashMod.flashFeeFactor")) - 1));
 
         assembly {
             sstore(slot, factor)
@@ -54,7 +54,7 @@ contract DifferentialFlashMod {
     }
 
     function getFlashFeeFactor(address token) internal view returns (uint256 factor) {
-        bytes32 slot = keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashFeeSlotIndex")) - 1));
+        bytes32 slot = keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashMod.flashFeeFactor")) - 1));
 
         assembly {
             factor := sload(slot)
