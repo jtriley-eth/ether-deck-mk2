@@ -16,8 +16,8 @@ flowchart LR
     e -->|call| target([Target])
 
     mods -->|delegate| Flash([FlashMod])
-    mods -->|delegate| MassRevoke([MassRevoke])
-    mods -->|delegate| MassTransfer([MassTransfer])
+    mods -->|delegate| RevokeMod([RevokeMod])
+    mods -->|delegate| TransferMod([TransferMod])
 ```
 
 ## Core
