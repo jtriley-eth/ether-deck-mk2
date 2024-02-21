@@ -195,7 +195,6 @@ must be taken before setting mods to the deck.
 - [`FlatlineMod`](src/mods/FlatlineMod.sol): A mod for using a deadman's switch.
 - [`RevokeMod`](src/mods/RevokeMod.sol): A mod for revoking approvals and operators in batch.
 - [`TransferMod`](src/mods/TransferMod.sol): A mod for transferring in batch.
-- [`Mod4337`](src/mods/Mod4337.sol): A mod for ERC-4337 compliance.
 - [`StorageMod`](src/mods/StorageMod.sol): A mod for reading and writing storage slots in batch.
 - [`TwoStepTransitionMod`](src/mods/TwoStepTransitionMod.sol): A mod for two-step runner transitions.
 
