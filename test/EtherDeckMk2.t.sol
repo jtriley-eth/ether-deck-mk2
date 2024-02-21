@@ -423,7 +423,7 @@ contract EtherDeckMk2Test is Test {
             }
         }
 
-        (bool succ, ) = address(deck).call(payload);
+        (bool succ,) = address(deck).call(payload);
 
         if (shouldSet && !throws) {
             assertTrue(succ);

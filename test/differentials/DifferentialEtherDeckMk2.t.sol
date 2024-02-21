@@ -173,13 +173,7 @@ contract DifferentialEtherDeckMk2Test is Test {
         vm.stopPrank();
     }
 
-    function testFuzzDiffDispatch(
-        address runner,
-        bytes4 selector,
-        bytes32 salt,
-        bool throws,
-        bool shouldSet
-    ) public {
+    function testFuzzDiffDispatch(address runner, bytes4 selector, bytes32 salt, bool throws, bool shouldSet) public {
         assumeFallback(selector);
         address mod = address(new MockMod{ salt: salt }());
 
@@ -201,8 +195,8 @@ contract DifferentialEtherDeckMk2Test is Test {
 
         vm.stopPrank();
 
-        (bool fastSucc, ) = address(fastDeck).call(abi.encodeWithSelector(selector));
-        (bool slowSucc, ) = address(slowDeck).call(abi.encodeWithSelector(selector));
+        (bool fastSucc,) = address(fastDeck).call(abi.encodeWithSelector(selector));
+        (bool slowSucc,) = address(slowDeck).call(abi.encodeWithSelector(selector));
 
         if (shouldSet && !throws) {
             assertEq(fastSucc, true);

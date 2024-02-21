@@ -17,11 +17,7 @@ contract DifferentialDeckHubTest is Test {
         slowHub = new DifferentialDeckHub();
     }
 
-    function testFuzzDiffDeploy(
-        address actor,
-        address runner,
-        bytes32 salt
-    ) public {
+    function testFuzzDiffDeploy(address actor, address runner, bytes32 salt) public {
         vm.expectEmit(true, true, true, true, address(fastHub));
         emit DeckHub.Deployed(actor, compute(address(fastHub), runner, salt));
         vm.prank(actor);

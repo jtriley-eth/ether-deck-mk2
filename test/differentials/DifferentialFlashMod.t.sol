@@ -166,7 +166,8 @@ contract DifferentialFlashModTest is Test {
     function getFlashFeeFactor(address mod, address token) internal view returns (uint256) {
         return uint256(
             vm.load(
-                address(mod), keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashMod.flashFeeFactor")) - 1))
+                address(mod),
+                keccak256(abi.encode(token, uint256(keccak256("EtherDeckMk2.FlashMod.flashFeeFactor")) - 1))
             )
         );
     }

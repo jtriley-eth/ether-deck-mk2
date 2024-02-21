@@ -15,7 +15,7 @@ contract DifferentialTransferMod {
         require(receivers.length == amounts.length);
 
         for (uint256 i; i < receivers.length; i++) {
-            (bool succ, ) = receivers[i].call{ value: amounts[i] }(new bytes(0));
+            (bool succ,) = receivers[i].call{ value: amounts[i] }(new bytes(0));
             require(succ);
         }
     }
